@@ -1,7 +1,6 @@
 package com.patrickfeltes.interpreter;
 
 import com.patrickfeltes.interpreter.tokens.*;
-import com.patrickfeltes.interpreter.tokens.reserved.DispToken;
 
 /**
  * The Lexer takes a program and splits it into tokens to be read by the parser.
@@ -33,12 +32,12 @@ public class Lexer {
             if (currentChar == '\n' || currentChar == ':') {
                 advance();
                 lineNumber++;
-                return new EOLToken(lineNumber - 1);
+                return TokenFactory.createToken(lineNumber - 1, TokenType.EOL);
             }
 
             if (Character.isSpaceChar(currentChar)) {
                 advance();
-                return new SpaceToken(lineNumber);
+                return TokenFactory.createToken(lineNumber, TokenType.SPACE);
             }
 
             if (Character.isLetter(currentChar)) {
@@ -49,7 +48,7 @@ public class Lexer {
                 if (reservedToken == null) {
                     currentPosition = originalPosition;
                     currentChar = program.charAt(currentPosition);
-                    Token token = new VariableToken(lineNumber, currentChar);
+                    Token token = TokenFactory.createVariableToken(lineNumber, currentChar);
                     advance();
                     return token;
                 } else {
@@ -58,7 +57,7 @@ public class Lexer {
             }
         }
 
-        return new EOFToken(lineNumber);
+        return TokenFactory.createToken(lineNumber, TokenType.EOF);
     }
 
     /**
@@ -94,7 +93,7 @@ public class Lexer {
     private Token getReservedToken(String possibleReserved) {
         switch (possibleReserved) {
             case "Disp":
-                return new DispToken(lineNumber);
+                return TokenFactory.createToken(lineNumber, TokenType.DISP);
             default:
                 return null;
         }

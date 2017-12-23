@@ -9,6 +9,18 @@ public enum TokenType {
     EOL,
     SPACE,
     VARIABLE,
-    DISP
+    DISP,
+    PLUS,
+    MINUS,
+    MUL,
+    DIV,
+    NUMBER,
+    LPAREN,
+    RPAREN,
+    LBRACKET,
+    RBRACKET,
+    LBRACE,
+    RBRACE,
+    QUOTE
 
 }

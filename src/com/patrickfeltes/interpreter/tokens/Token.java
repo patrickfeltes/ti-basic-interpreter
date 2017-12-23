@@ -4,18 +4,25 @@ package com.patrickfeltes.interpreter.tokens;
  * Tokens are the discrete items that make up a line of code.
  * An example of a token is "+" or "if".
   */
-public abstract class Token {
+public class Token {
 
-    protected int lineNumber;
-    protected TokenType type;
+    private int lineNumber;
+    private TokenType type;
 
-    public Token(int lineNumber, TokenType type) {
+    private Object value;
+
+    public Token(int lineNumber, TokenType type, Object value) {
         this.lineNumber = lineNumber;
         this.type = type;
+        this.value = value;
     }
 
     public TokenType getType() {
         return type;
+    }
+
+    public Object getValue() {
+        return value;
     }
 
     public int getLineNumber() {
