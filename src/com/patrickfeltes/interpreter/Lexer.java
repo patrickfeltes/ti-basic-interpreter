@@ -55,6 +55,13 @@ public class Lexer {
                     return reservedToken;
                 }
             }
+
+            // store token
+            if ((currentChar == '-' && peek() == '>') || (currentChar == '→')) {
+                return TokenFactory.createToken(lineNumber, TokenType.STORE);
+            }
+
+            return singleCharTokens();
         }
 
         return TokenFactory.createToken(lineNumber, TokenType.EOF);
@@ -69,6 +76,82 @@ public class Lexer {
             currentChar = EMPTY_CHAR;
         } else {
             currentChar = program.charAt(currentPosition);
+        }
+    }
+
+    private char peek() {
+        if (currentPosition < program.length() - 1) {
+            return program.charAt(currentPosition + 1);
+        } else {
+            return EMPTY_CHAR;
+        }
+    }
+
+    /**
+     * Handles all the single character tokens.
+     * @return a single character token if it exists
+     */
+    private Token singleCharTokens() {
+        switch (currentChar) {
+            case '+':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.PLUS);
+            case '-':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.MINUS);
+            case '*':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.MUL);
+            case '/':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.DIV);
+            case '(':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.LPAREN);
+            case ')':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.RPAREN);
+            case '[':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.LBRACKET);
+            case ']':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.RBRACKET);
+            case '{':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.LBRACE);
+            case '}':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.RBRACE);
+            case '"':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.QUOTE);
+            case '^':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.POW);
+            case '!':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.EXCLAMATION);
+            case '<':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.LT);
+            case '>':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.GT);
+            case '≤':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.LTOE);
+            case '≥':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.GTOE);
+            case '=':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.EQUAL);
+            case '≠':
+                advance();
+                return TokenFactory.createToken(lineNumber, TokenType.NOT_EQUAL);
+            default:
+                return null;
         }
     }
 

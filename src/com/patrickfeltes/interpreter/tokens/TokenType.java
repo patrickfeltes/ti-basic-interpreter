@@ -14,6 +14,15 @@ public enum TokenType {
     MINUS,
     MUL,
     DIV,
+    POW,
+    EXCLAMATION,
+    EQUAL,
+    NOT_EQUAL,
+    GT,
+    LT,
+    GTOE,
+    LTOE,
+    PI,
     NUMBER,
     LPAREN,
     RPAREN,
@@ -21,6 +30,7 @@ public enum TokenType {
     RBRACKET,
     LBRACE,
     RBRACE,
-    QUOTE
+    QUOTE,
+    STORE
 
 }

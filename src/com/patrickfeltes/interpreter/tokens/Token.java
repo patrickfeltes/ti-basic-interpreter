@@ -40,4 +40,9 @@ public class Token {
         if (lineNumber != token.lineNumber) return false;
         return type == token.type;
     }
+
+    @Override
+    public String toString() {
+        return lineNumber + " " + type + " " + value;
+    }
 }

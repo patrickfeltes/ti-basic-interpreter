@@ -34,6 +34,24 @@ public class TokenFactory {
                 return new Token(lineNumber, type, "}");
             case QUOTE:
                 return new Token(lineNumber, type, "\"");
+            case STORE:
+                return new Token(lineNumber, type, "->");
+            case POW:
+                return new Token(lineNumber, type, "^");
+            case EXCLAMATION:
+                return new Token(lineNumber, type, "!");
+            case LT:
+                return new Token(lineNumber, type, "<");
+            case GT:
+                return new Token(lineNumber, type, ">");
+            case LTOE:
+                return new Token(lineNumber, type, "≤");
+            case GTOE:
+                return new Token(lineNumber, type, "≥");
+            case EQUAL:
+                return new Token(lineNumber, type, "=");
+            case NOT_EQUAL:
+                return new Token(lineNumber, type, "≠");
             default:
                 return null;
         }

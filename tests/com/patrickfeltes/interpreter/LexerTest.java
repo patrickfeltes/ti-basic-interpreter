@@ -99,4 +99,57 @@ public class LexerTest {
         expected = TokenFactory.createToken(2, TokenType.EOF);
         assertEquals(expected, lexer.getNextToken());
     }
+
+    @Test
+    public void getNextToken_store() throws Exception {
+        String program = "->";
+        Lexer lexer = new Lexer(program);
+        assertEquals(TokenFactory.createToken(1, TokenType.STORE), lexer.getNextToken());
+        program = "→";
+        lexer = new Lexer(program);
+        assertEquals(TokenFactory.createToken(1, TokenType.STORE), lexer.getNextToken());
+    }
+
+    @Test
+    public void getNextToken_operations() throws Exception {
+        String program = "+-*/^";
+        Lexer lexer = new Lexer(program);
+        assertEquals(TokenFactory.createToken(1, TokenType.PLUS), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.MINUS), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.MUL), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.DIV), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.POW), lexer.getNextToken());
+    }
+
+    @Test
+    public void getNextToken_groupingSymbols() throws Exception {
+        String program = "()[]{}\"";
+        Lexer lexer = new Lexer(program);
+        assertEquals(TokenFactory.createToken(1, TokenType.LPAREN), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.RPAREN), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.LBRACKET), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.RBRACKET), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.LBRACE), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.RBRACE), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.QUOTE), lexer.getNextToken());
+    }
+
+    @Test
+    public void getNextToken_comparisonSymbols() throws Exception {
+        String program = "<>≤≥=≠";
+        Lexer lexer = new Lexer(program);
+        assertEquals(TokenFactory.createToken(1, TokenType.LT), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.GT), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.LTOE), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.GTOE), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.EQUAL), lexer.getNextToken());
+        assertEquals(TokenFactory.createToken(1, TokenType.NOT_EQUAL), lexer.getNextToken());
+    }
+
+    @Test
+    public void getNextToken_miscSymbols() throws Exception {
+        String program = "!";
+        Lexer lexer = new Lexer(program);
+        assertEquals(TokenFactory.createToken(1, TokenType.EXCLAMATION), lexer.getNextToken());
+    }
 }
