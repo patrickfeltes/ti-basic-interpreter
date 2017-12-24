@@ -2,6 +2,8 @@ package com.patrickfeltes.interpreter;
 
 import com.patrickfeltes.interpreter.tokens.*;
 
+import java.nio.charset.CharacterCodingException;
+
 /**
  * The Lexer takes a program and splits it into tokens to be read by the parser.
  */
@@ -59,6 +61,11 @@ public class Lexer {
             // store token
             if ((currentChar == '-' && peek() == '>') || (currentChar == '→')) {
                 return TokenFactory.createToken(lineNumber, TokenType.STORE);
+            }
+
+            // numbers
+            if (Character.isDigit(currentChar)) {
+                return getNumber();
             }
 
             return singleCharTokens();
@@ -153,6 +160,30 @@ public class Lexer {
             default:
                 return null;
         }
+    }
+
+    /**
+     * Gets a number at the current position.
+     * @return The token holding the number.
+     */
+    private Token getNumber() {
+        StringBuilder number = new StringBuilder();
+        boolean hasDecimal = false;
+        while (Character.isDigit(currentChar)) {
+            number.append(currentChar);
+            advance();
+            if (currentChar == '.' && hasDecimal) {
+                System.out.println("Syntax error: numbers can't have multiple decimal points.");
+                System.exit(-1);
+            } else if (currentChar == '.') {
+                hasDecimal = true;
+                number.append(currentChar);
+                advance();
+            }
+        }
+
+        double value = Double.parseDouble(number.toString());
+        return TokenFactory.createNumberToken(lineNumber, value);
     }
 
     /**

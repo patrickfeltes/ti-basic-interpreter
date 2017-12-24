@@ -152,4 +152,20 @@ public class LexerTest {
         Lexer lexer = new Lexer(program);
         assertEquals(TokenFactory.createToken(1, TokenType.EXCLAMATION), lexer.getNextToken());
     }
+
+    // numbers
+
+    @Test
+    public void getNextToken_integer() throws Exception {
+        String program = "123";
+        Lexer lexer = new Lexer(program);
+        assertEquals(TokenFactory.createNumberToken(1, 123), lexer.getNextToken());
+    }
+
+    @Test
+    public void getNextToken_double() throws Exception {
+        String program = "123.123";
+        Lexer lexer = new Lexer(program);
+        assertEquals(TokenFactory.createNumberToken(1, 123.123), lexer.getNextToken());
+    }
 }
