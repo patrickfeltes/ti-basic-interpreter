@@ -6,7 +6,7 @@ package com.patrickfeltes.interpreter.tokens;
 public enum TokenType {
 
     // "single character" tokens
-    PLUS, MINUS, MUL, DIV, POW,EXCLAMATION,
+    PLUS, MINUS, MUL, DIV, POW, EXCLAMATION,
     EQUAL, NOT_EQUAL, GT, LT, GTOE, LTOE,
     LPAREN, RPAREN, LBRACKET, RBRACKET,
     LBRACE, RBRACE, STORE, COMMA,

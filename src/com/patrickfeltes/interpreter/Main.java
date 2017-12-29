@@ -1,6 +1,8 @@
 package com.patrickfeltes.interpreter;
 
 import com.patrickfeltes.interpreter.files.FileUtilities;
+import com.patrickfeltes.interpreter.tokens.Token;
+import com.patrickfeltes.interpreter.tokens.TokenType;
 
 public class Main {
 
@@ -17,6 +19,14 @@ public class Main {
 
     public static void error(int lineNumber, String message) {
         report(lineNumber, "", message);
+    }
+
+    public static void error(Token token, String message) {
+        if (token.type == TokenType.EOF) {
+            report(token.lineNumber, " at end", message);
+        } else {
+            report(token.lineNumber, "at '" + token.lexeme + "'", message);
+        }
     }
 
     private static void report(int lineNumber, String where, String message) {

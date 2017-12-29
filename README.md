@@ -5,4 +5,5 @@ This project is an interpreter for the TI BASIC programming language. Its purpos
 ## Useful Resources
 Here is a list of online resources that helped me get jump-started in the process of making this interpreter. If you'looking to learn more about interpreters, these resources are extremely helpful. Thank you to the authors.
 - [Crafting Interpreters](http://craftinginterpreters.com/) by [@munificent](https://github.com/munificent)
+    - A majority of the base code for this interpreter comes from this book.
 - [Let's Build an Interpreter](https://ruslanspivak.com/lsbasi-part1/) by [@rspivak](https://github.com/rspivak/)
