@@ -13,7 +13,7 @@ public class LexerTest {
 
     // commands
     @Test
-    public void getNextToken_singleDisp() throws Exception {
+    public void scanTokens_singleDisp() throws Exception {
         String program = "Disp";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -24,7 +24,7 @@ public class LexerTest {
 
     // variables
     @Test
-    public void getNextToken_singleVariable() throws Exception {
+    public void scanTokens_singleVariable() throws Exception {
         String program = "A";
         List<Token> expected = new ArrayList<>();
         expected.add(new Token(IDENTIFIER, "A", null, 1));
@@ -33,7 +33,7 @@ public class LexerTest {
     }
 
     @Test
-    public void getNextToken_multipleDiscreteVariables() throws Exception {
+    public void scanTokens_multipleDiscreteVariables() throws Exception {
         String program = "Z A B";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -45,7 +45,7 @@ public class LexerTest {
     }
 
     @Test
-    public void getNextToken_adjacentVariables() throws Exception {
+    public void scanTokens_adjacentVariables() throws Exception {
         String program = "ZAB";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -59,7 +59,7 @@ public class LexerTest {
 
     // mixture
     @Test
-    public void getNextToken_dispWithVariables() throws Exception {
+    public void scanTokens_dispWithVariables() throws Exception {
         String program = "Disp A";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -71,7 +71,7 @@ public class LexerTest {
 
     // new lines
     @Test
-    public void getNextToken_multiline() throws Exception {
+    public void scanTokens_multiline() throws Exception {
         String program = "Disp\nA";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -83,7 +83,7 @@ public class LexerTest {
     }
 
     @Test
-    public void getNextToken_multilineColon() throws Exception {
+    public void scanTokens_multilineColon() throws Exception {
         String program = "Disp:A";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -95,7 +95,7 @@ public class LexerTest {
     }
 
     @Test
-    public void getNextToken_store() throws Exception {
+    public void scanTokens_store() throws Exception {
         String program = "->";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -111,7 +111,7 @@ public class LexerTest {
     }
 
     @Test
-    public void getNextToken_operations() throws Exception {
+    public void scanTokens_operations() throws Exception {
         String program = "+-*/^";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -125,8 +125,8 @@ public class LexerTest {
     }
 
     @Test
-    public void getNextToken_groupingSymbols() throws Exception {
-        String program = "()[]{}\"";
+    public void scanTokens_groupingSymbols() throws Exception {
+        String program = "()[]{}";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
         expected.add(new Token(LPAREN, "(", null, 1));
@@ -135,13 +135,12 @@ public class LexerTest {
         expected.add(new Token(RBRACKET, "]", null, 1));
         expected.add(new Token(LBRACE, "{", null, 1));
         expected.add(new Token(RBRACE, "}", null, 1));
-        expected.add(new Token(QUOTE, "\"", null, 1));
         expected.add(new Token(EOF, "", null, 1));
         assertEquals(expected, lexer.lexTokens());
     }
 
     @Test
-    public void getNextToken_comparisonSymbols() throws Exception {
+    public void scanTokens_comparisonSymbols() throws Exception {
         String program = "<>≤≥=≠";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -156,7 +155,7 @@ public class LexerTest {
     }
 
     @Test
-    public void getNextToken_miscSymbols() throws Exception {
+    public void scanTokens_miscSymbols() throws Exception {
         String program = "!";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -168,7 +167,7 @@ public class LexerTest {
     // numbers
 
     @Test
-    public void getNextToken_integer() throws Exception {
+    public void scanTokens_integer() throws Exception {
         String program = "123";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
@@ -178,11 +177,21 @@ public class LexerTest {
     }
 
     @Test
-    public void getNextToken_double() throws Exception {
+    public void scanTokens_double() throws Exception {
         String program = "123.123";
         Lexer lexer = new Lexer(program);
         List<Token> expected = new ArrayList<>();
         expected.add(new Token(NUMBER, "123.123", 123.123, 1));
+        expected.add(new Token(EOF, "", null, 1));
+        assertEquals(expected, lexer.lexTokens());
+    }
+
+    @Test
+    public void scanTokens_string() {
+        String program = "\"HELLO\"";
+        Lexer lexer = new Lexer(program);
+        List<Token> expected = new ArrayList<>();
+        expected.add(new Token(STRING, "\"HELLO\"", "HELLO", 1));
         expected.add(new Token(EOF, "", null, 1));
         assertEquals(expected, lexer.lexTokens());
     }

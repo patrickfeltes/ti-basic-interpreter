@@ -9,11 +9,12 @@ public enum TokenType {
     PLUS, MINUS, MUL, DIV, POW,EXCLAMATION,
     EQUAL, NOT_EQUAL, GT, LT, GTOE, LTOE,
     LPAREN, RPAREN, LBRACKET, RBRACKET,
-    LBRACE, RBRACE, QUOTE, STORE, COMMA,
+    LBRACE, RBRACE, STORE, COMMA,
 
     // different types
     NUMBER,
     IDENTIFIER,
+    STRING,
 
     // keywords
     DISP, AND, OR, XOR, WHILE, FOR, IF,

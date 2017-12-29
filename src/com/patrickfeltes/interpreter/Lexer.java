@@ -90,7 +90,9 @@ public class Lexer {
             case '≥': addToken(GTOE); break;
             case '^': addToken(POW); break;
             case '!': addToken(match('=') ? NOT_EQUAL : EXCLAMATION); break;
-            case '"': addToken(QUOTE); break;
+            case '"':
+                string();
+                break;
             case '→': addToken(STORE); break;
             case ' ':
             case '\t':
@@ -105,6 +107,27 @@ public class Lexer {
                     Main.error(lineNumber, "Unexpected character.");
                 }
         }
+    }
+
+    /**
+     * Lexes a string into a token
+     */
+    private void string() {
+        while (peek() != '"' && peek() != '\n' && !atEnd()) {
+            advance();
+        }
+
+        if (atEnd() || peek() == '\n') {
+            Main.error(lineNumber, "Unterminated String.");
+            return;
+        }
+
+        // move past the ending quote
+        advance();
+
+        // trim off quotes
+        String value = source.substring(startPosition + 1, currentPosition - 1);
+        addToken(TokenType.STRING, value);
     }
 
     /**
