@@ -1,48 +1,44 @@
 package com.patrickfeltes.interpreter.tokens;
 
+import java.util.Objects;
+
 /**
  * Tokens are the discrete items that make up a line of code.
  * An example of a token is "+" or "if".
   */
 public class Token {
 
-    private int lineNumber;
-    private TokenType type;
+    final TokenType type;
+    final String lexeme;
+    final Object literal;
+    final int lineNumber;
 
-    private Object value;
-
-    public Token(int lineNumber, TokenType type, Object value) {
-        this.lineNumber = lineNumber;
+    public Token(TokenType type, String lexeme, Object literal, int lineNumber) {
         this.type = type;
-        this.value = value;
+        this.lexeme = lexeme;
+        this.literal = literal;
+        this.lineNumber = lineNumber;
     }
 
-    public TokenType getType() {
-        return type;
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public int getLineNumber() {
-        return lineNumber;
-    }
-
-    // generated for testing purposes
+    // generated for testing only
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Token token = (Token) o;
-
-        if (lineNumber != token.lineNumber) return false;
-        return type == token.type;
+        return lineNumber == token.lineNumber &&
+                type == token.type &&
+                Objects.equals(lexeme, token.lexeme) &&
+                Objects.equals(literal, token.literal);
     }
 
     @Override
     public String toString() {
-        return lineNumber + " " + type + " " + value;
+        return "Token{" +
+                "type=" + type +
+                ", lexeme='" + lexeme + '\'' +
+                ", literal=" + literal +
+                ", lineNumber=" + lineNumber +
+                '}';
     }
 }

@@ -5,32 +5,21 @@ package com.patrickfeltes.interpreter.tokens;
  */
 public enum TokenType {
 
-    EOF,
-    EOL,
-    SPACE,
-    VARIABLE,
-    DISP,
-    PLUS,
-    MINUS,
-    MUL,
-    DIV,
-    POW,
-    EXCLAMATION,
-    EQUAL,
-    NOT_EQUAL,
-    GT,
-    LT,
-    GTOE,
-    LTOE,
-    PI,
+    // "single character" tokens
+    PLUS, MINUS, MUL, DIV, POW,EXCLAMATION,
+    EQUAL, NOT_EQUAL, GT, LT, GTOE, LTOE,
+    LPAREN, RPAREN, LBRACKET, RBRACKET,
+    LBRACE, RBRACE, QUOTE, STORE, COMMA,
+
+    // different types
     NUMBER,
-    LPAREN,
-    RPAREN,
-    LBRACKET,
-    RBRACKET,
-    LBRACE,
-    RBRACE,
-    QUOTE,
-    STORE
+    IDENTIFIER,
+
+    // keywords
+    DISP, AND, OR, XOR, WHILE, FOR, IF,
+    ELSE, THEN,
+
+    // ends
+    EOL, EOF
 
 }

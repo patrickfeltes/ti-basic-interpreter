@@ -2,215 +2,204 @@ package com.patrickfeltes.interpreter;
 
 import com.patrickfeltes.interpreter.tokens.*;
 
-import java.nio.charset.CharacterCodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.patrickfeltes.interpreter.tokens.TokenType.*;
 
 /**
- * The Lexer takes a program and splits it into tokens to be read by the parser.
+ * The Lexer takes a source and splits it into tokens to be read by the parser.
  */
 public class Lexer {
 
-    private static final char EMPTY_CHAR = '\u0000';
+    private String source;
 
-    private String program;
-
+    // variable to store the start location of each token
+    private int startPosition;
     private int currentPosition;
-    private char currentChar;
-
     private int lineNumber;
 
+    private final List<Token> tokens = new ArrayList<>();
+
+    private static Map<String, TokenType> keywords = new HashMap<>();
+
+    static {
+        keywords.put("and", AND);
+        keywords.put("or", OR);
+        keywords.put("xor", XOR);
+        keywords.put("Disp", DISP);
+        keywords.put("If", IF);
+        keywords.put("Then", THEN);
+        keywords.put("Else", ELSE);
+        keywords.put("For", FOR);
+        keywords.put("While", WHILE);
+    }
+
     public Lexer(String program) {
-        this.program = program;
+        this.source = program;
         lineNumber = 1;
         currentPosition = 0;
-        currentChar = program.charAt(0);
     }
 
     /**
-     * Gets the next token in the program
-     * @return the next token in the program
+     * Lexes all the tokens in the program.
+     * @return A list of all of the tokens of the program, in order.
      */
-    public Token getNextToken() {
-        while (currentChar != EMPTY_CHAR) {
-            if (currentChar == '\n' || currentChar == ':') {
-                advance();
+    public List<Token> lexTokens() {
+        while (!atEnd()) {
+            startPosition = currentPosition;
+            lexToken();
+        }
+
+        tokens.add(new Token(TokenType.EOF, "", null, lineNumber));
+
+        return tokens;
+    }
+
+    /**
+     * Lexes the next token.
+     */
+    private void lexToken() {
+        // get the current token, and move the position pointer to the next token
+        char c = advance();
+
+        switch (c) {
+            case '(': addToken(LPAREN); break;
+            case ')': addToken(RPAREN); break;
+            case '[': addToken(LBRACKET); break;
+            case ']': addToken(RBRACKET); break;
+            case '{': addToken(LBRACE); break;
+            case '}': addToken(RBRACE); break;
+            case ',': addToken(COMMA); break;
+            case '+': addToken(PLUS); break;
+            case '-': addToken(match('>') ? STORE : MINUS); break;
+            case '*': addToken(MUL); break;
+            case '/': addToken(DIV); break;
+            case ':': addToken(EOL); break;
+            case '\n':
+                addToken(EOL);
                 lineNumber++;
-                return TokenFactory.createToken(lineNumber - 1, TokenType.EOL);
-            }
-
-            if (Character.isSpaceChar(currentChar)) {
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.SPACE);
-            }
-
-            if (Character.isLetter(currentChar)) {
-                int originalPosition = currentPosition;
-                String possibleReserved = getPossibleKeyword();
-
-                Token reservedToken = getReservedToken(possibleReserved);
-                if (reservedToken == null) {
-                    currentPosition = originalPosition;
-                    currentChar = program.charAt(currentPosition);
-                    Token token = TokenFactory.createVariableToken(lineNumber, currentChar);
-                    advance();
-                    return token;
+                break;
+            case '=': addToken(EQUAL); break;
+            case '≠': addToken(NOT_EQUAL); break;
+            case '>': addToken(match('=') ? GTOE : GT); break;
+            case '<': addToken(match('=') ? LTOE : LT); break;
+            case '≤': addToken(LTOE); break;
+            case '≥': addToken(GTOE); break;
+            case '^': addToken(POW); break;
+            case '!': addToken(match('=') ? NOT_EQUAL : EXCLAMATION); break;
+            case '"': addToken(QUOTE); break;
+            case '→': addToken(STORE); break;
+            case ' ':
+            case '\t':
+            case '\r':
+                break;
+            default:
+                if (Character.isDigit(c)) {
+                    number();
+                } else if (Character.isAlphabetic(c)) {
+                    identifier();
                 } else {
-                    return reservedToken;
+                    Main.error(lineNumber, "Unexpected character.");
                 }
-            }
-
-            // store token
-            if ((currentChar == '-' && peek() == '>') || (currentChar == '→')) {
-                return TokenFactory.createToken(lineNumber, TokenType.STORE);
-            }
-
-            // numbers
-            if (Character.isDigit(currentChar)) {
-                return getNumber();
-            }
-
-            return singleCharTokens();
         }
-
-        return TokenFactory.createToken(lineNumber, TokenType.EOF);
     }
 
     /**
-     * Advances to the next character in the String.
+     * Lexes an identifier(a variable name or a keyword) and adds it to the token list.
      */
-    private void advance() {
-        currentPosition++;
-        if (currentPosition >= program.length()) {
-            currentChar = EMPTY_CHAR;
-        } else {
-            currentChar = program.charAt(currentPosition);
+    private void identifier() {
+        while (Character.isAlphabetic(peek()) || Character.isDigit(peek())) advance();
+
+        String text = source.substring(startPosition, currentPosition);
+
+        TokenType type = keywords.get(text);
+        if (type == null) {
+            type = IDENTIFIER;
+            // set the current position to 1 after the start, so that an identifier can only be one character long
+            currentPosition = startPosition + 1;
+            if (currentPosition >= source.length()) currentPosition = source.length();
         }
+        addToken(type);
     }
 
+    /**
+     * Lexes a number and adds it as a token to the token list.
+     */
+    private void number() {
+        while(Character.isDigit(peek())) advance();
+
+        if (peek() == '.' && Character.isDigit(peekNext())) {
+            advance();
+
+            while (Character.isDigit(peek())) advance();
+        }
+
+        addToken(NUMBER, Double.parseDouble(source.substring(startPosition, currentPosition)));
+    }
+
+    /**
+     * Peek at the current char if it's not at the end of the source.
+     * @return the current char.
+     */
     private char peek() {
-        if (currentPosition < program.length() - 1) {
-            return program.charAt(currentPosition + 1);
-        } else {
-            return EMPTY_CHAR;
-        }
+        if (atEnd()) return '\0';
+        return source.charAt(currentPosition);
     }
 
     /**
-     * Handles all the single character tokens.
-     * @return a single character token if it exists
+     * Peeks at the next char if it's not the end of the source.
+     * @return the next char.
      */
-    private Token singleCharTokens() {
-        switch (currentChar) {
-            case '+':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.PLUS);
-            case '-':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.MINUS);
-            case '*':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.MUL);
-            case '/':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.DIV);
-            case '(':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.LPAREN);
-            case ')':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.RPAREN);
-            case '[':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.LBRACKET);
-            case ']':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.RBRACKET);
-            case '{':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.LBRACE);
-            case '}':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.RBRACE);
-            case '"':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.QUOTE);
-            case '^':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.POW);
-            case '!':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.EXCLAMATION);
-            case '<':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.LT);
-            case '>':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.GT);
-            case '≤':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.LTOE);
-            case '≥':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.GTOE);
-            case '=':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.EQUAL);
-            case '≠':
-                advance();
-                return TokenFactory.createToken(lineNumber, TokenType.NOT_EQUAL);
-            default:
-                return null;
-        }
+    private char peekNext() {
+        if (currentPosition + 1 >= source.length()) return '\0';
+        return source.charAt(currentPosition + 1);
     }
 
     /**
-     * Gets a number at the current position.
-     * @return The token holding the number.
+     * Helper method to determine if the current character matches the desired character.
+     * If that is true, move the next character and return true, else return false.
+     * @param expected the expected character to match.
+     * @return true if the current character matches the expected, false otherwise.
      */
-    private Token getNumber() {
-        StringBuilder number = new StringBuilder();
-        boolean hasDecimal = false;
-        while (Character.isDigit(currentChar)) {
-            number.append(currentChar);
-            advance();
-            if (currentChar == '.' && hasDecimal) {
-                System.out.println("Syntax error: numbers can't have multiple decimal points.");
-                System.exit(-1);
-            } else if (currentChar == '.') {
-                hasDecimal = true;
-                number.append(currentChar);
-                advance();
-            }
-        }
+    private boolean match(char expected) {
+        if (atEnd()) return false;
+        if (source.charAt(currentPosition) != expected) return false;
 
-        double value = Double.parseDouble(number.toString());
-        return TokenFactory.createNumberToken(lineNumber, value);
+        currentPosition++;
+        return true;
     }
 
     /**
-     * Builds a String of all adjacent characters in the line
-     * @return the String
+     * Helper method to determine if the current position is at the end of the source
+     * @return true if at end, false otherwise
      */
-    private String getPossibleKeyword() {
-        StringBuilder builder = new StringBuilder();
-        while(Character.isLetter(currentChar)) {
-            builder.append(currentChar);
-            advance();
-        }
-        return builder.toString();
+    private boolean atEnd() {
+        return currentPosition >= source.length();
     }
 
     /**
-     * Given a string determine if it is possibly a keyword
-     * @param possibleReserved The String to check
-     * @return the token of that keyword if it exists, else null
+     * Advances to the next char and gives the previous char.
+     * @return the previous char after the advance.
      */
-    private Token getReservedToken(String possibleReserved) {
-        switch (possibleReserved) {
-            case "Disp":
-                return TokenFactory.createToken(lineNumber, TokenType.DISP);
-            default:
-                return null;
-        }
+    private char advance() {
+        currentPosition++;
+        return source.charAt(currentPosition - 1);
+    }
+
+    /**
+     * Adds a token of the current type to the list of tokens.
+     * @param type the type of token to add.
+     */
+    private void addToken(TokenType type) {
+        addToken(type, null);
+    }
+
+    private void addToken(TokenType type, Object literal) {
+        String text = source.substring(startPosition, currentPosition);
+        tokens.add(new Token(type, text, literal, lineNumber));
     }
 
 }
