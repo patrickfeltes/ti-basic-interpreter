@@ -46,7 +46,7 @@ public class Parser {
      */
 
 
-    private Expr expression() {
+    public Expr expression() {
         return addition();
     }
 
