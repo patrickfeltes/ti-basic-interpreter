@@ -41,7 +41,8 @@ public class Parser {
             expression     : addition ;
             addition       : multiplication (("+" | "-") multiplication)* ;
             multiplication : unary (("*" | "/") unary)* ;
-            unary          : (("+" | "-") unary) | primary ;
+            unary          : (("+" | "-") unary) | exponent ;
+            exponent       : (primary "^" exponent) | unary ;
             primary        : NUMBER | STRING | ("(" expression ")") ;
      */
 
@@ -81,7 +82,20 @@ public class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return primary();
+        return exponent();
+    }
+
+    private Expr exponent() {
+        Expr expr = primary();
+
+        // if there is a power, we need to call exponent again for right-associativity
+        while (match(POW)) {
+            Token operator = previous();
+            Expr right = unary();
+            return new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
     }
 
     private Expr primary() {

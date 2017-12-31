@@ -22,6 +22,8 @@ public class Interpreter implements Expr.Visitor<Object> {
                 return (double)left * (double)right;
             case DIV:
                 return (double)left / (double)right;
+            case POW:
+                return Math.pow((double)left, (double)right);
         }
 
         return null;
