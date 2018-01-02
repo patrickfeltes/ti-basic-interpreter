@@ -1,7 +1,7 @@
 package com.patrickfeltes.interpreter;
 
-import com.patrickfeltes.interpreter.ast.Expr;
 import com.patrickfeltes.interpreter.ast.Parser;
+import com.patrickfeltes.interpreter.ast.Stmt;
 import com.patrickfeltes.interpreter.files.FileUtilities;
 import com.patrickfeltes.interpreter.tokens.Token;
 import com.patrickfeltes.interpreter.tokens.TokenType;
@@ -16,19 +16,21 @@ public class Main {
     public static void main(String[] args) {
         if (args.length == 0) {
             Scanner scanner = new Scanner(System.in);
-            List<Token> tokens;
             while (true) {
-                String expression = scanner.nextLine();
-                tokens = new Lexer(expression).lexTokens();
-                Expr expr = new Parser(tokens).expression();
-                System.out.println(new Interpreter().interpret(expr));
+                execute(scanner.nextLine());
             }
-        } else if (args.length != 1) {
+        } else if (args.length == 1) {
+            execute(FileUtilities.readFileToString(args[0]));
+        } else {
             System.out.println("Invalid program arguments. Please provide the " +
                     "filepath to your file relative to this directory as an argument.");
         }
+    }
 
-        System.out.println(FileUtilities.readFileToString(args[0]));
+    public static void execute(String program) {
+        List<Token> tokens = new Lexer(program).lexTokens();
+        List<Stmt> statements = new Parser(tokens).parse();
+        new Interpreter().interpret(statements);
     }
 
     public static void error(int lineNumber, String message) {
@@ -39,7 +41,7 @@ public class Main {
         if (token.type == TokenType.EOF) {
             report(token.lineNumber, " at end", message);
         } else {
-            report(token.lineNumber, "at '" + token.lexeme + "'", message);
+            report(token.lineNumber, " at '" + token.lexeme + "'", message);
         }
     }
 

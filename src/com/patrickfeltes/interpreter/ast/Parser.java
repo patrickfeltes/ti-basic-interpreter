@@ -7,6 +7,7 @@ import com.patrickfeltes.interpreter.tokens.TokenType;
 
 import static com.patrickfeltes.interpreter.tokens.TokenType.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,6 +39,15 @@ public class Parser {
             |   = exclusive or
 
         Current Grammar:
+
+            // Statements
+            program        : statement* EOF ;
+            statement      : exprStatement
+                           | dispStatement ;
+            exprStatement  : expression (EOL | EOF) ;
+            dispStatement  : "Disp" expression (EOL | EOF) ;
+
+            // Expressions
             expression     : addition ;
             addition       : multiplication (("+" | "-") multiplication)* ;
             multiplication : unary (("*" | "/") unary)* ;
@@ -46,6 +56,40 @@ public class Parser {
             primary        : NUMBER | STRING | ("(" expression ")") ;
      */
 
+
+    public List<Stmt> parse() {
+        List<Stmt> statements = new ArrayList<>();
+        while (!atEnd()) {
+            statements.add(statement());
+        }
+
+        return statements;
+    }
+
+    public Stmt statement() {
+        if (match(DISP)) return dispStatement();
+
+        return exprStatement();
+    }
+
+    public Stmt dispStatement() {
+        Expr expr = expression();
+        // no need for an end of line if it is the end of the file
+        if (!atEnd()) {
+            eat(EOL, "Expect a new line after value(s)");
+        }
+        return new Stmt.Disp(expr);
+    }
+
+    public Stmt exprStatement() {
+        Expr expr = expression();
+
+        // no need for an end of line if it is the end of the file
+        if (!atEnd()) {
+            eat(EOL, "Expect a new line after expression");
+        }
+        return new Stmt.Expression(expr);
+    }
 
     public Expr expression() {
         return addition();

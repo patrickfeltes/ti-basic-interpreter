@@ -1,11 +1,16 @@
 package com.patrickfeltes.interpreter;
 
 import com.patrickfeltes.interpreter.ast.Expr;
+import com.patrickfeltes.interpreter.ast.Stmt;
 
-public class Interpreter implements Expr.Visitor<Object> {
+import java.util.List;
 
-    public String interpret(Expr expr) {
-        return evaluate(expr).toString();
+public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
+
+    public void interpret(List<Stmt> statements) {
+        for (Stmt stmt : statements) {
+            execute(stmt);
+        }
     }
 
     @Override
@@ -53,6 +58,10 @@ public class Interpreter implements Expr.Visitor<Object> {
         return null;
     }
 
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
+    }
+
     /**
      * Calls the accept method passing this as the parameter, so that the accept method can call
      * the proper method back here to visit the correct type of expression
@@ -61,5 +70,18 @@ public class Interpreter implements Expr.Visitor<Object> {
      */
     private Object evaluate(Expr expr) {
         return expr.accept(this);
+    }
+
+    @Override
+    public Object visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Object visitDispStmt(Stmt.Disp stmt) {
+        Object value = evaluate(stmt.expression);
+        System.out.println(value.toString());
+        return null;
     }
 }

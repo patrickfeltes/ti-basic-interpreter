@@ -25,8 +25,7 @@ public class FileUtilities {
                 line = reader.readLine();
             }
 
-            // need to delete extra newline character
-            return builder.deleteCharAt(builder.length() - 1).toString();
+            return builder.toString();
         } catch (FileNotFoundException e) {
             System.out.println("Unable to locate file.");
             System.exit(-1);

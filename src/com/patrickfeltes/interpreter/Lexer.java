@@ -77,9 +77,21 @@ public class Lexer {
             case '-': addToken(match('>') ? STORE : MINUS); break;
             case '*': addToken(MUL); break;
             case '/': addToken(DIV); break;
-            case ':': addToken(EOL); break;
+            case ':':
+                addToken(EOL);
+                // handle multiple new lines in a row
+                while (peek() == ':' || peek() == '\n') {
+                    if (peek() == '\n') lineNumber++;
+                    advance();
+                }
+                break;
             case '\n':
                 addToken(EOL);
+                // handle multiple new lines in a row
+                while (peek() == ':' || peek() == '\n') {
+                    if (peek() == '\n') lineNumber++;
+                    advance();
+                }
                 lineNumber++;
                 break;
             case '=': addToken(EQUAL); break;
