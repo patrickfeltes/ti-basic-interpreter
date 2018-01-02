@@ -6,7 +6,13 @@ import com.patrickfeltes.interpreter.errors.RuntimeError;
 
 import java.util.List;
 
+import static com.patrickfeltes.interpreter.tokens.TokenType.AND;
+import static com.patrickfeltes.interpreter.tokens.TokenType.OR;
+
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+
+    private static final double TRUE = 1.0;
+    private static final double FALSE = 0.0;
 
     private final Environment environment = new Environment();
 
@@ -36,6 +42,18 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 return (double)left / (double)right;
             case POW:
                 return Math.pow((double)left, (double)right);
+            case GT:
+                return ((double)left > (double)right) ? TRUE : FALSE;
+            case GTOE:
+                return ((double)left >= (double)right) ? TRUE : FALSE;
+            case LT:
+                return ((double)left < (double)right) ? TRUE : FALSE;
+            case LTOE:
+                return ((double)left <= (double)right) ? TRUE : FALSE;
+            case EQUAL:
+                return ((double)(left) == (double)right) ? TRUE : FALSE;
+            case NOT_EQUAL:
+                return ((double)left != (double)right) ? TRUE : FALSE;
         }
 
         return null;
@@ -68,6 +86,27 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
         return environment.get(expr.name);
+    }
+
+    @Override
+    public Object visitLogicalExpr(Expr.Logical expr) {
+        Object left = evaluate(expr.left);
+        Object right = evaluate(expr.right);
+
+        if (!(left instanceof Double && right instanceof Double)) {
+            throw new RuntimeError(expr.operator, "Expect numbers in logical operation");
+        }
+
+        double leftValue = (double)left;
+        double rightValue = (double)right;
+
+        if (expr.operator.type == AND) {
+            return (leftValue != FALSE && rightValue != FALSE) ? TRUE : FALSE;
+        } else if (expr.operator.type == OR) {
+            return (leftValue != FALSE || rightValue != FALSE) ? TRUE : FALSE;
+        }
+
+        throw new RuntimeError(expr.operator, "Unexpected logical operator.");
     }
 
     @Override

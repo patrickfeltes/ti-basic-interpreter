@@ -50,7 +50,11 @@ public class Parser {
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
 
             // Expressions
-            expression              : addition ;
+            expression              : logic_or ;
+            logic_or                : logic_and ("or" logic_and)* ;
+            logic_and               : equality ("and" equality)* ;
+            equality                : comparison (("=" | "≠") comparison)* ;
+            comparison              : addition ((">" | ">=" | "<" | "<=" addition)* ;
             addition                : multiplication (("+" | "-") multiplication)* ;
             multiplication          : unary (("*" | "/") unary)* ;
             unary                   : (("+" | "-") unary) | exponent ;
@@ -105,7 +109,55 @@ public class Parser {
     }
 
     public Expr expression() {
-        return addition();
+        return or();
+    }
+
+    public Expr or() {
+        Expr expr = and();
+
+        while (match(OR)) {
+            Token operator = previous();
+            Expr right = and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    public Expr and() {
+        Expr expr = equality();
+
+        while (match(AND)) {
+            Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    public Expr equality() {
+        Expr expr = comparison();
+
+        while (match(TokenType.NOT_EQUAL, TokenType.EQUAL)) {
+            Token operator = previous();
+            Expr right = comparison();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    public Expr comparison() {
+        Expr expr = addition();
+
+        while (match(TokenType.GT, TokenType.GTOE, TokenType.LT, TokenType.LTOE)) {
+            Token operator = previous();
+            Expr right = addition();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
     }
 
     private Expr addition() {
