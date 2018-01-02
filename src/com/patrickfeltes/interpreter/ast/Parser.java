@@ -2,7 +2,6 @@ package com.patrickfeltes.interpreter.ast;
 
 import com.patrickfeltes.interpreter.Main;
 import com.patrickfeltes.interpreter.errors.ParseError;
-import com.patrickfeltes.interpreter.errors.RuntimeError;
 import com.patrickfeltes.interpreter.tokens.Token;
 import com.patrickfeltes.interpreter.tokens.TokenType;
 
@@ -109,22 +108,33 @@ public class Parser {
             names.add(eat(IDENTIFIER, "Expect an identifier."));
         }
 
+        if (!atEnd()) {
+            eat(EOL, "Expect new line after Prompt statement.");
+        }
+
         return new Stmt.Prompt(names);
     }
 
     private Stmt inputStatement() {
+        Stmt toReturn = null;
+
         if (match(STRING)) {
             String prompt = (String)previous().literal;
             eat(COMMA, "Expect a comma after message.");
             Token name = eat(IDENTIFIER, "Expect an identifier after comma.");
-            return new Stmt.Input(prompt, name);
+            toReturn = new Stmt.Input(prompt, name);
         } else if (match(IDENTIFIER)) {
-            return new Stmt.Input(previous());
+            toReturn = new Stmt.Input(previous());
         } else if (match(EOL) || atEnd()) {
             return new Stmt.Input();
         }
 
-        throw error(peek(), "Unexpected arguments for Input");
+        if (atEnd()) {
+            return toReturn;
+        } else {
+            eat(EOL, "Expect new line after input statement");
+            return toReturn;
+        }
     }
 
     private Stmt exprOrAssignStatement() {
