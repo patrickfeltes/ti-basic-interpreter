@@ -2,14 +2,21 @@ package com.patrickfeltes.interpreter;
 
 import com.patrickfeltes.interpreter.ast.Expr;
 import com.patrickfeltes.interpreter.ast.Stmt;
+import com.patrickfeltes.interpreter.errors.RuntimeError;
 
 import java.util.List;
 
-public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
+public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+
+    private final Environment environment = new Environment();
 
     public void interpret(List<Stmt> statements) {
         for (Stmt stmt : statements) {
-            execute(stmt);
+            try {
+                execute(stmt);
+            } catch (RuntimeError error) {
+                Main.runtimeError(error);
+            }
         }
     }
 
@@ -58,6 +65,32 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         return null;
     }
 
+    @Override
+    public Object visitVariableExpr(Expr.Variable expr) {
+        return environment.get(expr.name);
+    }
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitDispStmt(Stmt.Disp stmt) {
+        for (Expr expression : stmt.expressions) {
+            System.out.println(evaluate(expression).toString());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAssignStmt(Stmt.Assign stmt) {
+        Object value = evaluate(stmt.expression);
+        environment.assign(stmt.name, value);
+        return null;
+    }
+
     private void execute(Stmt stmt) {
         stmt.accept(this);
     }
@@ -70,19 +103,5 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
      */
     private Object evaluate(Expr expr) {
         return expr.accept(this);
-    }
-
-    @Override
-    public Object visitExpressionStmt(Stmt.Expression stmt) {
-        evaluate(stmt.expression);
-        return null;
-    }
-
-    @Override
-    public Object visitDispStmt(Stmt.Disp stmt) {
-        for (Expr expression : stmt.expressions) {
-            System.out.println(evaluate(expression).toString());
-        }
-        return null;
     }
 }

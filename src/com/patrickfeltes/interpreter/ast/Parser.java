@@ -41,19 +41,21 @@ public class Parser {
         Current Grammar:
 
             // Statements
-            program        : statement* EOF ;
-            statement      : exprStatement
-                           | dispStatement ;
-            exprStatement  : expression (EOL | EOF) ;
-            dispStatement  : "Disp" expression ("," expression) (EOL | EOF) ;
+            program                 : statement* EOF ;
+            statement               : exprStatement
+                                    | dispStatement
+                                    | assignStatement;
+
+            exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
+            dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
 
             // Expressions
-            expression     : addition ;
-            addition       : multiplication (("+" | "-") multiplication)* ;
-            multiplication : unary (("*" | "/") unary)* ;
-            unary          : (("+" | "-") unary) | exponent ;
-            exponent       : (primary "^" exponent) | unary ;
-            primary        : NUMBER | STRING | ("(" expression ")") ;
+            expression              : addition ;
+            addition                : multiplication (("+" | "-") multiplication)* ;
+            multiplication          : unary (("*" | "/") unary)* ;
+            unary                   : (("+" | "-") unary) | exponent ;
+            exponent                : (primary "^" exponent) | unary ;
+            primary                 : NUMBER | STRING | IDENTIFIER | ("(" expression ")") ;
      */
 
 
@@ -69,7 +71,7 @@ public class Parser {
     public Stmt statement() {
         if (match(DISP)) return dispStatement();
 
-        return exprStatement();
+        return exprOrAssignStatement();
     }
 
     public Stmt dispStatement() {
@@ -87,8 +89,13 @@ public class Parser {
         return new Stmt.Disp(expressions);
     }
 
-    public Stmt exprStatement() {
+    public Stmt exprOrAssignStatement() {
         Expr expr = expression();
+
+        if (match(STORE)) {
+            Token name = eat(IDENTIFIER, "Expect an identifier after store.");
+            return new Stmt.Assign(expr, name);
+        }
 
         // no need for an end of line if it is the end of the file
         if (!atEnd()) {
@@ -157,6 +164,10 @@ public class Parser {
             Expr expr = expression();
             eat(RPAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
+        }
+
+        if (match(IDENTIFIER)) {
+            return new Expr.Variable(previous());
         }
 
         throw error(peek(), "Expect expression.");
