@@ -1,5 +1,7 @@
 package com.patrickfeltes.interpreter.ast;
 
+import java.util.List;
+
 public abstract class Stmt {
 
     public abstract <R> R accept(Visitor<R> visitor);
@@ -23,10 +25,10 @@ public abstract class Stmt {
     }
 
     public static class Disp extends Stmt {
-        public final Expr expression;
+        public final List<Expr> expressions;
 
-        public Disp(Expr expression) {
-            this.expression = expression;
+        public Disp(List<Expr> expressions) {
+            this.expressions = expressions;
         }
 
         @Override

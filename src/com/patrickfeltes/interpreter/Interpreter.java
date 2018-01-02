@@ -80,8 +80,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
 
     @Override
     public Object visitDispStmt(Stmt.Disp stmt) {
-        Object value = evaluate(stmt.expression);
-        System.out.println(value.toString());
+        for (Expr expression : stmt.expressions) {
+            System.out.println(evaluate(expression).toString());
+        }
         return null;
     }
 }

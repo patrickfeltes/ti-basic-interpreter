@@ -45,7 +45,7 @@ public class Parser {
             statement      : exprStatement
                            | dispStatement ;
             exprStatement  : expression (EOL | EOF) ;
-            dispStatement  : "Disp" expression (EOL | EOF) ;
+            dispStatement  : "Disp" expression ("," expression) (EOL | EOF) ;
 
             // Expressions
             expression     : addition ;
@@ -73,12 +73,18 @@ public class Parser {
     }
 
     public Stmt dispStatement() {
-        Expr expr = expression();
+        List<Expr> expressions = new ArrayList<>();
+        expressions.add(expression());
+
+        while (match(COMMA)) {
+            expressions.add(expression());
+        }
+
         // no need for an end of line if it is the end of the file
         if (!atEnd()) {
             eat(EOL, "Expect a new line after value(s)");
         }
-        return new Stmt.Disp(expr);
+        return new Stmt.Disp(expressions);
     }
 
     public Stmt exprStatement() {
