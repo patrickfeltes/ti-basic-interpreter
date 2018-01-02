@@ -153,7 +153,7 @@ public class Parser {
         return new Stmt.Expression(expr);
     }
 
-    private Expr expression() {
+    public Expr expression() {
         return or();
     }
 

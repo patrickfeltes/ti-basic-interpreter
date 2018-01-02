@@ -1,20 +1,28 @@
-package com.patrickfeltes.interpreter;
+package com.patrickfeltes.interpreter.interpreters;
 
+import com.patrickfeltes.interpreter.Environment;
+import com.patrickfeltes.interpreter.Lexer;
+import com.patrickfeltes.interpreter.Main;
 import com.patrickfeltes.interpreter.ast.Expr;
 import com.patrickfeltes.interpreter.ast.Stmt;
+import com.patrickfeltes.interpreter.ast.Parser;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
+import com.patrickfeltes.interpreter.tokens.Token;
 
 import java.util.List;
+import java.util.Scanner;
 
 import static com.patrickfeltes.interpreter.tokens.TokenType.AND;
 import static com.patrickfeltes.interpreter.tokens.TokenType.OR;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
+    private Scanner userInput = new Scanner(System.in);
+
     private static final double TRUE = 1.0;
     private static final double FALSE = 0.0;
 
-    private final Environment environment = new Environment();
+    private Environment environment = new Environment();
 
     public void interpret(List<Stmt> statements) {
         for (Stmt stmt : statements) {
@@ -132,17 +140,28 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitPromptStmt(Stmt.Prompt stmt) {
+        for (Token name : stmt.names) {
+            handleUserInput(name.lexeme + "?", name);
+        }
+
         return null;
     }
 
     @Override
     public Void visitInputStmt(Stmt.Input stmt) {
+        handleUserInput(stmt.prompt, stmt.name);
         return null;
     }
 
+    private void handleUserInput(String prompt, Token name) {
+        String input;
+        do {
+            System.out.print(prompt);
+            input = userInput.nextLine();
+        } while (input.length() == 0);
 
-    private void execute(Stmt stmt) {
-        stmt.accept(this);
+        Expr expression = new Parser(new Lexer(input).lexTokens()).expression();
+        environment.assign(name, evaluate(expression));
     }
 
     /**
@@ -153,5 +172,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
      */
     private Object evaluate(Expr expr) {
         return expr.accept(this);
+    }
+
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 }

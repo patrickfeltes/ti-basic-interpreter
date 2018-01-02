@@ -4,6 +4,7 @@ import com.patrickfeltes.interpreter.ast.Parser;
 import com.patrickfeltes.interpreter.ast.Stmt;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
 import com.patrickfeltes.interpreter.files.FileUtilities;
+import com.patrickfeltes.interpreter.interpreters.Interpreter;
 import com.patrickfeltes.interpreter.tokens.Token;
 import com.patrickfeltes.interpreter.tokens.TokenType;
 
