@@ -28,6 +28,8 @@ public class Environment {
     }
 
     public void assign(Token name, Object value) {
+        if (!(value instanceof Double)) throw new RuntimeError(name, "Cannot assign a non-number to a number variable.");
+
         values.put(name.lexeme, value);
     }
 
