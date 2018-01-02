@@ -2,6 +2,7 @@ package com.patrickfeltes.interpreter.ast;
 
 import com.patrickfeltes.interpreter.Main;
 import com.patrickfeltes.interpreter.errors.ParseError;
+import com.patrickfeltes.interpreter.errors.RuntimeError;
 import com.patrickfeltes.interpreter.tokens.Token;
 import com.patrickfeltes.interpreter.tokens.TokenType;
 
@@ -44,10 +45,14 @@ public class Parser {
             program                 : statement* EOF ;
             statement               : exprStatement
                                     | dispStatement
+                                    | promptStatement
+                                    | inputStatement
                                     | assignStatement;
 
             exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
+            promptStatement         : "Prompt" IDENTIFIER ("," IDENTIFIER)* (EOL | EOF) ;
+            inputStatement          : "Input" (STRING ",")? IDENTIFIER? (EOL | EOF);
 
             // Expressions
             expression              : logic_or ;
@@ -72,13 +77,15 @@ public class Parser {
         return statements;
     }
 
-    public Stmt statement() {
+    private Stmt statement() {
         if (match(DISP)) return dispStatement();
+        if (match(PROMPT)) return promptStatement();
+        if (match(INPUT)) return inputStatement();
 
         return exprOrAssignStatement();
     }
 
-    public Stmt dispStatement() {
+    private Stmt dispStatement() {
         List<Expr> expressions = new ArrayList<>();
         expressions.add(expression());
 
@@ -90,10 +97,37 @@ public class Parser {
         if (!atEnd()) {
             eat(EOL, "Expect a new line after value(s)");
         }
+
         return new Stmt.Disp(expressions);
     }
 
-    public Stmt exprOrAssignStatement() {
+    private Stmt promptStatement() {
+        List<Token> names = new ArrayList<>();
+        names.add(eat(IDENTIFIER, "Expect an identifier."));
+        while (!match(EOL) && !atEnd()) {
+            eat(COMMA, "Expect a comma separating identifiers.");
+            names.add(eat(IDENTIFIER, "Expect an identifier."));
+        }
+
+        return new Stmt.Prompt(names);
+    }
+
+    private Stmt inputStatement() {
+        if (match(STRING)) {
+            String prompt = (String)previous().literal;
+            eat(COMMA, "Expect a comma after message.");
+            Token name = eat(IDENTIFIER, "Expect an identifier after comma.");
+            return new Stmt.Input(prompt, name);
+        } else if (match(IDENTIFIER)) {
+            return new Stmt.Input(previous());
+        } else if (match(EOL) || atEnd()) {
+            return new Stmt.Input();
+        }
+
+        throw error(peek(), "Unexpected arguments for Input");
+    }
+
+    private Stmt exprOrAssignStatement() {
         Expr expr = expression();
 
         if (match(STORE)) {
@@ -105,14 +139,15 @@ public class Parser {
         if (!atEnd()) {
             eat(EOL, "Expect a new line after expression");
         }
+
         return new Stmt.Expression(expr);
     }
 
-    public Expr expression() {
+    private Expr expression() {
         return or();
     }
 
-    public Expr or() {
+    private Expr or() {
         Expr expr = and();
 
         while (match(OR)) {
@@ -124,7 +159,7 @@ public class Parser {
         return expr;
     }
 
-    public Expr and() {
+    private Expr and() {
         Expr expr = equality();
 
         while (match(AND)) {
@@ -136,7 +171,7 @@ public class Parser {
         return expr;
     }
 
-    public Expr equality() {
+    private Expr equality() {
         Expr expr = comparison();
 
         while (match(TokenType.NOT_EQUAL, TokenType.EQUAL)) {
@@ -148,7 +183,7 @@ public class Parser {
         return expr;
     }
 
-    public Expr comparison() {
+    private Expr comparison() {
         Expr expr = addition();
 
         while (match(TokenType.GT, TokenType.GTOE, TokenType.LT, TokenType.LTOE)) {

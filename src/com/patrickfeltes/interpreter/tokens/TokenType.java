@@ -18,7 +18,7 @@ public enum TokenType {
 
     // keywords
     DISP, AND, OR, XOR, WHILE, FOR, IF,
-    ELSE, THEN,
+    ELSE, THEN, PROMPT, INPUT,
 
     // ends
     EOL, EOF

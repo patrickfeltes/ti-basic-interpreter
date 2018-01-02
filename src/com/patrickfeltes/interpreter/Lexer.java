@@ -35,6 +35,8 @@ public class Lexer {
         keywords.put("Else", ELSE);
         keywords.put("For", FOR);
         keywords.put("While", WHILE);
+        keywords.put("Prompt", PROMPT);
+        keywords.put("Input", INPUT);
     }
 
     public Lexer(String program) {
