@@ -180,6 +180,37 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitForStmt(Stmt.For stmt) {
+        /*
+            Odd behavior of for loop: both the end and step variables are determined before
+            start is assigned to the loop variable
+            They are only determined once, before the loop starts
+         */
+        double end = (double)evaluate(stmt.end);
+        double step = (double)evaluate(stmt.step);
+        // assign starting value to the loop variable
+        environment.assign(stmt.name, evaluate(stmt.start));
+
+        if (step > 0) {
+            for (double i = (double)environment.get(stmt.name); i <= end; i += step) {
+                environment.assign(stmt.name, i);
+                execute(stmt.statements);
+            }
+        } else if (step < 0) {
+            for (double i = (double)environment.get(stmt.name); i >= end; i += step) {
+                environment.assign(stmt.name, i);
+                execute(stmt.statements);
+            }
+        } else {
+            // TODO: figure out how to throw runtime exceptions for statements?
+            // need a token to throw?
+            //throw new RuntimeError()
+        }
+
+        return null;
+    }
+
     private void handleUserInput(String prompt, Token name) {
         String input;
         do {

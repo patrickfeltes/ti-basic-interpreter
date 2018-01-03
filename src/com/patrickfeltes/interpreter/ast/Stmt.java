@@ -16,6 +16,7 @@ public abstract class Stmt {
         R visitInputStmt(Input stmt);
         R visitIfStmt(If stmt);
         R visitWhileStmt(While stmt);
+        R visitForStmt(For stmt);
     }
 
     public static class Expression extends Stmt {
@@ -132,5 +133,25 @@ public abstract class Stmt {
         }
     }
 
+    public static class For extends Stmt {
+        public final Token name;
+        public final Expr start;
+        public final Expr end;
+        public final Expr step;
+        public final List<Stmt> statements;
+
+        public For(Token name, Expr start, Expr end, Expr step, List<Stmt> statements) {
+            this.name = name;
+            this.start = start;
+            this.end = end;
+            this.step = step;
+            this.statements = statements;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitForStmt(this);
+        }
+    }
 
 }

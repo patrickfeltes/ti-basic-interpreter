@@ -48,7 +48,8 @@ public class Parser {
                                     | inputStatement
                                     | assignStatement
                                     | ifStatement
-                                    | whileStatement ;
+                                    | whileStatement
+                                    | forStatement;
 
             exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
@@ -56,6 +57,7 @@ public class Parser {
             inputStatement          : "Input" (STRING ",")? IDENTIFIER? (EOL | EOF);
             ifStatement             : "If" expression EOL (("Then" EOL statement* ("Else" EOL statement*)? "End") | statement) (EOL | EOF) ;
             whileStatement          : "While" expression EOL statement* "END" (EOL | EOF)
+            forStatement            : "For" "(" IDENTIFIER "," expression "," expression ("," expression)? ")" statement* "End" (EOL | EOF) ;
 
             // Expressions
             expression              : logic_or ;
@@ -85,6 +87,7 @@ public class Parser {
         if (match(INPUT)) return inputStatement();
         if (match(IF)) return ifStatement();
         if (match(WHILE)) return whileStatement();
+        if (match(FOR)) return forStatement();
 
         return exprOrAssignStatement();
     }
@@ -199,6 +202,31 @@ public class Parser {
         }
 
         return new Stmt.While(condition, statements);
+    }
+
+    private Stmt forStatement() {
+        eat(LPAREN, "Expect '(' after For.");
+        Token name = eat(IDENTIFIER, "Expect an identifier after '('");
+        eat(COMMA, "Expect a comma after identifier.");
+        Expr start = expression();
+        eat(COMMA, "Expect a comma after start argument.");
+        Expr end = expression();
+        Expr step = new Expr.Literal(1.0);
+        if (match(COMMA)) {
+            step = expression();
+        }
+        eat(RPAREN, "Expect ')' after for statement");
+        eat(EOL, "Expect new line after For statement.");
+        List<Stmt> statements = new ArrayList<>();
+        while (!match(END)) {
+            statements.add(statement());
+        }
+
+        if (!atEnd()) {
+            eat(EOL, "Expect new line after End");
+        }
+
+        return new Stmt.For(name, start, end, step, statements);
     }
 
     public Expr expression() {
