@@ -37,6 +37,7 @@ public class Lexer {
         keywords.put("While", WHILE);
         keywords.put("Prompt", PROMPT);
         keywords.put("Input", INPUT);
+        keywords.put("End", END);
     }
 
     public Lexer(String program) {

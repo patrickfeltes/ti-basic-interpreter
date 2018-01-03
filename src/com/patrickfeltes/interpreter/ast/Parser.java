@@ -46,12 +46,14 @@ public class Parser {
                                     | dispStatement
                                     | promptStatement
                                     | inputStatement
-                                    | assignStatement;
+                                    | assignStatement
+                                    | ifStatement ;
 
             exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
             promptStatement         : "Prompt" IDENTIFIER ("," IDENTIFIER)* (EOL | EOF) ;
             inputStatement          : "Input" (STRING ",")? IDENTIFIER? (EOL | EOF);
+            ifStatement             : "If" expression EOL (("Then" EOL statement* ("Else" EOL statement*)? "End") | statement) (EOL | EOF) ;
 
             // Expressions
             expression              : logic_or ;
@@ -65,6 +67,37 @@ public class Parser {
             exponent                : (primary "^" exponent) | unary ;
             primary                 : NUMBER | STRING | IDENTIFIER | ("(" expression ")") ;
      */
+
+    private Stmt ifStatement() {
+        Expr condition = expression();
+        eat(EOL, "Expect new line after condition.");
+
+        List<Stmt> thenBranch = new ArrayList<>();
+        List<Stmt> elseBranch = new ArrayList<>();
+
+        if (match(THEN)) {
+            eat(EOL, "Expect new line after then.");
+            while (!match(END, ELSE)) {
+                thenBranch.add(statement());
+            }
+
+            if (previous().type == ELSE) {
+                eat(EOL, "Expect new line after else");
+                while (!match(END)) {
+                    elseBranch.add(statement());
+                }
+            }
+        } else {
+            thenBranch.add(statement());
+        }
+
+        if (!atEnd()) {
+            eat(EOL, "Expect new line after END");
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
+    }
+
 
 
     public List<Stmt> parse() {
@@ -80,6 +113,7 @@ public class Parser {
         if (match(DISP)) return dispStatement();
         if (match(PROMPT)) return promptStatement();
         if (match(INPUT)) return inputStatement();
+        if (match(IF)) return ifStatement();
 
         return exprOrAssignStatement();
     }
@@ -142,6 +176,7 @@ public class Parser {
 
         if (match(STORE)) {
             Token name = eat(IDENTIFIER, "Expect an identifier after store.");
+            eat(EOL, "Expect a new line after assign statement");
             return new Stmt.Assign(expr, name);
         }
 

@@ -153,6 +153,20 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+        Object value = evaluate(stmt.condition);
+        // TODO: throw error if this is not a double, need a token to throw with it, so maybe pass the if token into Stmt.If
+        double doubleValue = (double)value;
+        if (doubleValue != FALSE) {
+            execute(stmt.thenBranch);
+        } else {
+            execute(stmt.elseBranch);
+        }
+
+        return null;
+    }
+
     private void handleUserInput(String prompt, Token name) {
         String input;
         do {
@@ -176,5 +190,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private void execute(Stmt stmt) {
         stmt.accept(this);
+    }
+
+    private void execute(List<Stmt> statements) {
+        for (Stmt stmt : statements) {
+            execute(stmt);
+        }
     }
 }

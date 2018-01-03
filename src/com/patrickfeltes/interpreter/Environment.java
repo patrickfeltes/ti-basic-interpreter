@@ -17,7 +17,7 @@ public class Environment {
     public void defineVariables() {
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         for (int i = 0; i < alphabet.length(); i++) {
-            values.put("" + alphabet.charAt(i), 0);
+            values.put("" + alphabet.charAt(i), 0.0);
         }
     }
 

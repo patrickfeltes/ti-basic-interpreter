@@ -14,6 +14,7 @@ public abstract class Stmt {
         R visitAssignStmt(Assign stmt);
         R visitPromptStmt(Prompt stmt);
         R visitInputStmt(Input stmt);
+        R visitIfStmt(If stmt);
     }
 
     public static class Expression extends Stmt {
@@ -95,6 +96,23 @@ public abstract class Stmt {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitInputStmt(this);
+        }
+    }
+
+    public static class If extends Stmt {
+        public final Expr condition;
+        public final List<Stmt> thenBranch;
+        public final List<Stmt> elseBranch;
+
+        public If(Expr condition, List<Stmt> thenBranch, List<Stmt> elseBranch) {
+            this.condition = condition;
+            this.thenBranch = thenBranch;
+            this.elseBranch = elseBranch;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitIfStmt(this);
         }
     }
 
