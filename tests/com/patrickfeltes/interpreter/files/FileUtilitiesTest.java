@@ -8,7 +8,7 @@ public class FileUtilitiesTest {
 
     @Test
     public void readFileToString() throws Exception {
-        String expected = "1->A\nDisp A";
+        String expected = "1->A\nDisp A\n";
         assertEquals(expected, FileUtilities.readFileToString("programs/test1.bas"));
     }
 

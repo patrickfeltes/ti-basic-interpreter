@@ -158,10 +158,23 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Object value = evaluate(stmt.condition);
         // TODO: throw error if this is not a double, need a token to throw with it, so maybe pass the if token into Stmt.If
         double doubleValue = (double)value;
-        if (doubleValue != FALSE) {
+        if (isTrue(doubleValue)) {
             execute(stmt.thenBranch);
         } else {
             execute(stmt.elseBranch);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Void visitWhileStmt(Stmt.While stmt) {
+        // TODO: throw error if this is not a double
+        double conditionValue = (double)evaluate(stmt.condition);
+
+        while (isTrue(conditionValue)) {
+            execute(stmt.statements);
+            conditionValue = (double)evaluate(stmt.condition);
         }
 
         return null;
@@ -176,6 +189,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         Expr expression = new Parser(new Lexer(input).lexTokens()).expression();
         environment.assign(name, evaluate(expression));
+    }
+
+    private boolean isTrue(double value) {
+        return value != FALSE;
     }
 
     /**

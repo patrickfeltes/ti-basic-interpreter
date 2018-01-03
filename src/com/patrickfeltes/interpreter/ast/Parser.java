@@ -47,13 +47,15 @@ public class Parser {
                                     | promptStatement
                                     | inputStatement
                                     | assignStatement
-                                    | ifStatement ;
+                                    | ifStatement
+                                    | whileStatement ;
 
             exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
             promptStatement         : "Prompt" IDENTIFIER ("," IDENTIFIER)* (EOL | EOF) ;
             inputStatement          : "Input" (STRING ",")? IDENTIFIER? (EOL | EOF);
             ifStatement             : "If" expression EOL (("Then" EOL statement* ("Else" EOL statement*)? "End") | statement) (EOL | EOF) ;
+            whileStatement          : "While" expression EOL statement* "END" (EOL | EOF)
 
             // Expressions
             expression              : logic_or ;
@@ -67,38 +69,6 @@ public class Parser {
             exponent                : (primary "^" exponent) | unary ;
             primary                 : NUMBER | STRING | IDENTIFIER | ("(" expression ")") ;
      */
-
-    private Stmt ifStatement() {
-        Expr condition = expression();
-        eat(EOL, "Expect new line after condition.");
-
-        List<Stmt> thenBranch = new ArrayList<>();
-        List<Stmt> elseBranch = new ArrayList<>();
-
-        if (match(THEN)) {
-            eat(EOL, "Expect new line after then.");
-            while (!match(END, ELSE)) {
-                thenBranch.add(statement());
-            }
-
-            if (previous().type == ELSE) {
-                eat(EOL, "Expect new line after else");
-                while (!match(END)) {
-                    elseBranch.add(statement());
-                }
-            }
-        } else {
-            thenBranch.add(statement());
-        }
-
-        if (!atEnd()) {
-            eat(EOL, "Expect new line after END");
-        }
-
-        return new Stmt.If(condition, thenBranch, elseBranch);
-    }
-
-
 
     public List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
@@ -114,6 +84,7 @@ public class Parser {
         if (match(PROMPT)) return promptStatement();
         if (match(INPUT)) return inputStatement();
         if (match(IF)) return ifStatement();
+        if (match(WHILE)) return whileStatement();
 
         return exprOrAssignStatement();
     }
@@ -140,10 +111,6 @@ public class Parser {
         while (!match(EOL) && !atEnd()) {
             eat(COMMA, "Expect a comma separating identifiers.");
             names.add(eat(IDENTIFIER, "Expect an identifier."));
-        }
-
-        if (!atEnd()) {
-            eat(EOL, "Expect new line after Prompt statement.");
         }
 
         return new Stmt.Prompt(names);
@@ -186,6 +153,52 @@ public class Parser {
         }
 
         return new Stmt.Expression(expr);
+    }
+
+    private Stmt ifStatement() {
+        Expr condition = expression();
+        eat(EOL, "Expect new line after condition.");
+
+        List<Stmt> thenBranch = new ArrayList<>();
+        List<Stmt> elseBranch = new ArrayList<>();
+
+        if (match(THEN)) {
+            eat(EOL, "Expect new line after then.");
+            while (!match(END, ELSE)) {
+                thenBranch.add(statement());
+            }
+
+            if (previous().type == ELSE) {
+                eat(EOL, "Expect new line after else");
+                while (!match(END)) {
+                    elseBranch.add(statement());
+                }
+            }
+        } else {
+            thenBranch.add(statement());
+        }
+
+        if (!atEnd()) {
+            eat(EOL, "Expect new line after END");
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
+    }
+
+    private Stmt whileStatement() {
+        List<Stmt> statements = new ArrayList<>();
+        Expr condition = expression();
+        eat(EOL, "Expect new line after condition.");
+
+        while (!match(END)) {
+            statements.add(statement());
+        }
+
+        if (!atEnd()) {
+            eat(EOL, "Expect new line after END");
+        }
+
+        return new Stmt.While(condition, statements);
     }
 
     public Expr expression() {

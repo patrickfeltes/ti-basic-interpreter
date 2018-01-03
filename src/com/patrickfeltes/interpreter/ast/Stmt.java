@@ -15,6 +15,7 @@ public abstract class Stmt {
         R visitPromptStmt(Prompt stmt);
         R visitInputStmt(Input stmt);
         R visitIfStmt(If stmt);
+        R visitWhileStmt(While stmt);
     }
 
     public static class Expression extends Stmt {
@@ -113,6 +114,21 @@ public abstract class Stmt {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitIfStmt(this);
+        }
+    }
+
+    public static class While extends Stmt {
+        public final Expr condition;
+        public final List<Stmt> statements;
+
+        public While(Expr condition, List<Stmt> statements) {
+            this.condition = condition;
+            this.statements = statements;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitWhileStmt(this);
         }
     }
 
