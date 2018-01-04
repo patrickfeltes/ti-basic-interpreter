@@ -257,6 +257,25 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         throw new StopException();
     }
 
+    @Override
+    public Void visitMenuStmt(Stmt.Menu stmt) {
+        int input;
+        do {
+            printMenu(stmt);
+            System.out.print("Enter a number: ");
+            input = userInput.nextInt();
+        } while(input <= 0 || input > stmt.options.size());
+
+        throw new GotoException(stmt.labels.get(input - 1));
+    }
+
+    private void printMenu(Stmt.Menu stmt) {
+        System.out.println(stmt.title);
+        for (int i = 0; i < stmt.options.size(); i++) {
+            System.out.println((i + 1) + ":" + stmt.options.get(i));
+        }
+    }
+
     private void handleUserInput(String prompt, Token name) {
         String input;
         do {

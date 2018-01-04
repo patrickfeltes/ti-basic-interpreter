@@ -54,7 +54,8 @@ public class Parser {
                                     | labelStatement
                                     | repeatStatement
                                     | returnStatement
-                                    | stopStatement ;
+                                    | stopStatement
+                                    | menuStatement ;
 
             exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
@@ -68,6 +69,7 @@ public class Parser {
             repeatStatement         : "Repeat" expression EOL statement* "End" (EOL | EOF) ;
             returnStatement         : "Return" (EOL | EOF) ;
             stopStatement           : "Stop" (EOL | EOF) ;
+            menuStatement           :
 
             labelIdentifier         : (IDENTIFIER IDENTIFIER?)
                                     | (NUMBER IDENTIFIER?)
@@ -114,6 +116,7 @@ public class Parser {
         if (match(REPEAT)) return repeatStatement();
         if (match(RETURN)) return returnStatement();
         if (match(STOP)) return stopStatement();
+        if (match(MENU)) return menuStatement();
 
         return exprOrAssignStatement();
     }
@@ -335,6 +338,34 @@ public class Parser {
     private Stmt stopStatement() {
         eat(EOL, "Expect new line after Stop.");
         return new Stmt.Stop();
+    }
+
+    private Stmt menuStatement() {
+        eat(LPAREN, "Expect '(' after Menu.");
+        String title = (String)eat(STRING, "Expect a string for the title.").literal;
+        eat(COMMA, "Expect comma after title.");
+        List<String> options = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        options.add((String)eat(STRING, "Expect a string for an option.").literal);
+        eat(COMMA, "Expect comma after option string.");
+        labels.add(labelIdentifier());
+        int count = 1;
+        while (match(COMMA)) {
+            count++;
+            if (count > 7) {
+                throw error(peek(), "Can't have more than 7 menu items.");
+            } else {
+                String option = (String)eat(STRING, "Expect a string for an option.").literal;
+                options.add(option);
+                eat(COMMA, "Expect comma after option string.");
+                labels.add(labelIdentifier());
+            }
+        }
+        eat(RPAREN, "Expect ')' after Menu declaration.");
+        if (!atEnd()) {
+            eat(EOL, "Expect new line after Menu declaration.");
+        }
+        return new Stmt.Menu(title, options, labels);
     }
 
     private String labelIdentifier() {

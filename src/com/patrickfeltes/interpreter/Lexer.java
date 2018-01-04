@@ -43,6 +43,7 @@ public class Lexer {
         keywords.put("Repeat", REPEAT);
         keywords.put("Return", RETURN);
         keywords.put("Stop", STOP);
+        keywords.put("Menu", MENU);
     }
 
     public Lexer(String program) {

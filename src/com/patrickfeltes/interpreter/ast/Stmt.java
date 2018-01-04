@@ -32,6 +32,7 @@ public abstract class Stmt {
         R visitRepeatStmt(Repeat stmt);
         R visitReturnStmt(Return stmt);
         R visitStopStmt(Stop stmt);
+        R visitMenuStmt(Menu stmt);
     }
 
     public static class Expression extends Stmt {
@@ -221,6 +222,23 @@ public abstract class Stmt {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitStopStmt(this);
+        }
+    }
+
+    public static class Menu extends Stmt {
+        public final String title;
+        public final List<String> options;
+        public final List<String> labels;
+
+        public Menu(String title, List<String> options, List<String> labels) {
+            this.title = title;
+            this.options = options;
+            this.labels = labels;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitMenuStmt(this);
         }
     }
 }
