@@ -6,12 +6,15 @@ import com.patrickfeltes.interpreter.Main;
 import com.patrickfeltes.interpreter.ast.Expr;
 import com.patrickfeltes.interpreter.ast.Stmt;
 import com.patrickfeltes.interpreter.ast.Parser;
+import com.patrickfeltes.interpreter.data_types.TiList;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
 import com.patrickfeltes.interpreter.exceptions.GotoException;
 import com.patrickfeltes.interpreter.exceptions.ReturnException;
 import com.patrickfeltes.interpreter.exceptions.StopException;
 import com.patrickfeltes.interpreter.tokens.Token;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -89,6 +92,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
+        if (expr.type == Expr.Literal.LiteralType.LIST) {
+            List<Double> list = new ArrayList<>();
+            for (Expr expression : (List<Expr>)expr.value) {
+                list.add((double)evaluate(expression));
+            }
+
+            return new TiList(list);
+        }
+
         return expr.value;
     }
 

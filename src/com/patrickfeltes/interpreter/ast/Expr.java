@@ -2,6 +2,8 @@ package com.patrickfeltes.interpreter.ast;
 
 import com.patrickfeltes.interpreter.tokens.Token;
 
+import java.util.List;
+
 /**
  * Expr is a node of the syntax tree that evaluates to something.
  */
@@ -68,10 +70,19 @@ public abstract class Expr {
      * A class to represent a literal, basically holds value such as a number or string
      */
     public static class Literal extends Expr {
-        public final Object value;
+        public enum LiteralType {
+            DOUBLE,
+            STRING,
+            LIST,
+            MATRIX
+        }
 
-        public Literal(Object value) {
+        public final Object value;
+        public final LiteralType type;
+
+        public Literal(Object value, LiteralType type) {
             this.value = value;
+            this.type = type;
         }
 
         public <R> R accept(Visitor<R> visitor) {

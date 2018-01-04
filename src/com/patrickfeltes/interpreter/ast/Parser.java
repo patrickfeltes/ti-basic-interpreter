@@ -85,7 +85,13 @@ public class Parser {
             multiplication          : unary (("*" | "/") unary)* ;
             unary                   : (("+" | "-") unary) | exponent ;
             exponent                : (primary "^" exponent) | unary ;
-            primary                 : NUMBER | STRING | IDENTIFIER | ("(" expression ")") ;
+            primary                 : NUMBER
+                                    | STRING
+                                    | IDENTIFIER
+                                    | ("(" expression ")")
+                                    | list ;
+
+            list                    : "{" expression ("," expression)* "}"
      */
 
     public Stmt parse() {
@@ -261,7 +267,7 @@ public class Parser {
         Expr start = expression();
         eat(COMMA, "Expect a comma after start argument.");
         Expr end = expression();
-        Expr step = new Expr.Literal(1.0);
+        Expr step = new Expr.Literal(1.0, Expr.Literal.LiteralType.DOUBLE);
         if (match(COMMA)) {
             step = expression();
         }
@@ -495,8 +501,16 @@ public class Parser {
     }
 
     private Expr primary() {
-        if (match(NUMBER, STRING)) {
-            return new Expr.Literal(previous().literal);
+        if (match(NUMBER)) {
+            return new Expr.Literal(previous().literal, Expr.Literal.LiteralType.DOUBLE);
+        }
+
+        if (match(STRING)) {
+            return new Expr.Literal(previous().literal, Expr.Literal.LiteralType.STRING);
+        }
+
+        if (match(LBRACE)) {
+            return list();
         }
 
         if (match(LPAREN)) {
@@ -510,6 +524,16 @@ public class Parser {
         }
 
         throw error(peek(), "Expect expression.");
+    }
+
+    private Expr list() {
+        List<Expr> elements = new ArrayList<>();
+        elements.add(expression());
+        while (match(COMMA)) {
+            elements.add(expression());
+        }
+        eat(RBRACE, "Expect right brace after list.");
+        return new Expr.Literal(elements, Expr.Literal.LiteralType.LIST);
     }
 
     // helper methods
