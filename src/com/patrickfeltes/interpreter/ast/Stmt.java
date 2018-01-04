@@ -6,7 +6,17 @@ import java.util.List;
 
 public abstract class Stmt {
 
+    private Stmt next;
+
     public abstract <R> R accept(Visitor<R> visitor);
+
+    public void setNext(Stmt stmt) {
+        this.next = stmt;
+    }
+
+    public Stmt next() {
+        return next;
+    }
 
     public interface Visitor<R> {
         R visitExpressionStmt(Expression stmt);
@@ -105,13 +115,13 @@ public abstract class Stmt {
 
     public static class If extends Stmt {
         public final Expr condition;
-        public final List<Stmt> thenBranch;
-        public final List<Stmt> elseBranch;
+        public final Stmt thenHead;
+        public final Stmt elseHead;
 
-        public If(Expr condition, List<Stmt> thenBranch, List<Stmt> elseBranch) {
+        public If(Expr condition, Stmt thenHead, Stmt elseHead) {
             this.condition = condition;
-            this.thenBranch = thenBranch;
-            this.elseBranch = elseBranch;
+            this.thenHead = thenHead;
+            this.elseHead = elseHead;
         }
 
         @Override
@@ -122,11 +132,11 @@ public abstract class Stmt {
 
     public static class While extends Stmt {
         public final Expr condition;
-        public final List<Stmt> statements;
+        public final Stmt head;
 
-        public While(Expr condition, List<Stmt> statements) {
+        public While(Expr condition, Stmt head) {
             this.condition = condition;
-            this.statements = statements;
+            this.head = head;
         }
 
         @Override
@@ -140,14 +150,14 @@ public abstract class Stmt {
         public final Expr start;
         public final Expr end;
         public final Expr step;
-        public final List<Stmt> statements;
+        public final Stmt head;
 
-        public For(Token name, Expr start, Expr end, Expr step, List<Stmt> statements) {
+        public For(Token name, Expr start, Expr end, Expr step, Stmt head) {
             this.name = name;
             this.start = start;
             this.end = end;
             this.step = step;
-            this.statements = statements;
+            this.head = head;
         }
 
         @Override

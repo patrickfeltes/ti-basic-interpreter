@@ -4,7 +4,6 @@ import com.patrickfeltes.interpreter.ast.Expr;
 import com.patrickfeltes.interpreter.ast.Stmt;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,8 +13,8 @@ public class LabelMarker implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     private Map<String, Stmt> labels = new HashMap<>();
 
-    public Map<String, Stmt> getLabels(List<Stmt> statements) {
-        mark(statements);
+    public Map<String, Stmt> getLabels(Stmt head) {
+        markAll(head);
         return labels;
     }
 
@@ -76,20 +75,20 @@ public class LabelMarker implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitIfStmt(Stmt.If stmt) {
-        mark(stmt.thenBranch);
-        mark(stmt.elseBranch);
+        markAll(stmt.thenHead);
+        markAll(stmt.elseHead);
         return null;
     }
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
-        mark(stmt.statements);
+        markAll(stmt.head);
         return null;
     }
 
     @Override
     public Void visitForStmt(Stmt.For stmt) {
-        mark(stmt.statements);
+        markAll(stmt.head);
         return null;
     }
 
@@ -107,13 +106,15 @@ public class LabelMarker implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         return null;
     }
 
-    private void mark(List<Stmt> statements) {
-        for (Stmt statement : statements) {
-            mark(statement);
-        }
+    private void markSingle(Stmt stmt) {
+        stmt.accept(this);
     }
 
-    private void mark(Stmt stmt) {
-        stmt.accept(this);
+    private void markAll(Stmt stmt) {
+        Stmt statement = stmt;
+        while (statement != null) {
+            markSingle(statement);
+            statement = statement.next();
+        }
     }
 }

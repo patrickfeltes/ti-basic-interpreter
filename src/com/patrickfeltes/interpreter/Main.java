@@ -36,10 +36,10 @@ public class Main {
 
     public static void execute(String program) {
         List<Token> tokens = new Lexer(program).lexTokens();
-        List<Stmt> statements = new Parser(tokens).parse();
-        Map<String, Stmt> labels = new LabelMarker().getLabels(statements);
+        Stmt head = new Parser(tokens).parse();
+        Map<String, Stmt> labels = new LabelMarker().getLabels(head);
         System.out.println(labels);
-        interpreter.interpret(statements);
+        interpreter.interpret(head);
     }
 
     public static void error(int lineNumber, String message) {

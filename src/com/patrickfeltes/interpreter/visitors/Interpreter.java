@@ -9,7 +9,6 @@ import com.patrickfeltes.interpreter.ast.Parser;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
 import com.patrickfeltes.interpreter.tokens.Token;
 
-import java.util.List;
 import java.util.Scanner;
 
 import static com.patrickfeltes.interpreter.tokens.TokenType.AND;
@@ -24,10 +23,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private Environment environment = new Environment();
 
-    public void interpret(List<Stmt> statements) {
-        for (Stmt stmt : statements) {
+    public void interpret(Stmt head) {
+        Stmt statement = head;
+        while (statement != null) {
             try {
-                execute(stmt);
+                executeSingleStatement(statement);
+                statement = statement.next();
             } catch (RuntimeError error) {
                 Main.runtimeError(error);
             }
@@ -159,9 +160,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         // TODO: throw error if this is not a double, need a token to throw with it, so maybe pass the if token into Stmt.If
         double doubleValue = (double)value;
         if (isTrue(doubleValue)) {
-            execute(stmt.thenBranch);
+            executeAllStatements(stmt.thenHead);
         } else {
-            execute(stmt.elseBranch);
+            executeAllStatements(stmt.elseHead);
         }
 
         return null;
@@ -173,7 +174,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         double conditionValue = (double)evaluate(stmt.condition);
 
         while (isTrue(conditionValue)) {
-            execute(stmt.statements);
+            executeAllStatements(stmt.head);
             conditionValue = (double)evaluate(stmt.condition);
         }
 
@@ -195,12 +196,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         if (step > 0) {
             for (double i = (double)environment.get(stmt.name); i <= end; i += step) {
                 environment.assign(stmt.name, i);
-                execute(stmt.statements);
+                executeAllStatements(stmt.head);
             }
         } else if (step < 0) {
             for (double i = (double)environment.get(stmt.name); i >= end; i += step) {
                 environment.assign(stmt.name, i);
-                execute(stmt.statements);
+                executeAllStatements(stmt.head);
             }
         } else {
             // TODO: figure out how to throw runtime exceptions for statements?
@@ -246,13 +247,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return expr.accept(this);
     }
 
-    private void execute(Stmt stmt) {
-        stmt.accept(this);
+    private void executeAllStatements(Stmt stmt) {
+        Stmt curStmt = stmt;
+        while (curStmt != null) {
+            curStmt.accept(this);
+            curStmt = curStmt.next();
+        }
     }
 
-    private void execute(List<Stmt> statements) {
-        for (Stmt stmt : statements) {
-            execute(stmt);
-        }
+    private void executeSingleStatement(Stmt stmt) {
+        stmt.accept(this);
     }
 }

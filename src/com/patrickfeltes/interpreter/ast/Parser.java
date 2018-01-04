@@ -66,6 +66,7 @@ public class Parser {
             labelIdentifier         : (IDENTIFIER IDENTIFIER?)
                                     | (NUMBER IDENTIFIER?)
                                     | (IDENTIFIER NUMBER?) ;
+            statementList           : statement* ;
 
             // Expressions
             expression              : logic_or ;
@@ -80,13 +81,20 @@ public class Parser {
             primary                 : NUMBER | STRING | IDENTIFIER | ("(" expression ")") ;
      */
 
-    public List<Stmt> parse() {
-        List<Stmt> statements = new ArrayList<>();
+    public Stmt parse() {
+        Stmt head = null;
+        Stmt tail = null;
         while (!atEnd()) {
-            statements.add(statement());
+            if (head == null) {
+                head = statement();
+                tail = head;
+            } else {
+                tail.setNext(statement());
+                tail = tail.next();
+            }
         }
 
-        return statements;
+        return head;
     }
 
     private Stmt statement() {
@@ -172,46 +180,67 @@ public class Parser {
         Expr condition = expression();
         eat(EOL, "Expect new line after condition.");
 
-        List<Stmt> thenBranch = new ArrayList<>();
-        List<Stmt> elseBranch = new ArrayList<>();
+        Stmt thenHead = null;
+        Stmt thenTail = null;
+        Stmt elseHead = null;
+        Stmt elseTail = null;
 
         if (match(THEN)) {
             eat(EOL, "Expect new line after then.");
             while (!match(END, ELSE)) {
-                thenBranch.add(statement());
+                if (thenHead == null) {
+                    thenHead = statement();
+                    thenTail = thenHead;
+                } else {
+                    thenTail.setNext(statement());
+                    thenTail = thenTail.next();
+                }
             }
 
             if (previous().type == ELSE) {
                 eat(EOL, "Expect new line after else");
                 while (!match(END)) {
-                    elseBranch.add(statement());
+                    if (elseHead == null) {
+                        elseHead = statement();
+                        elseTail = elseHead;
+                    } else {
+                        elseTail.setNext(statement());
+                        elseTail = elseTail.next();
+                    }
                 }
             }
         } else {
-            thenBranch.add(statement());
+            thenHead = statement();
         }
 
         if (!atEnd()) {
             eat(EOL, "Expect new line after END");
         }
 
-        return new Stmt.If(condition, thenBranch, elseBranch);
+        return new Stmt.If(condition, thenHead, elseHead);
     }
 
     private Stmt whileStatement() {
-        List<Stmt> statements = new ArrayList<>();
         Expr condition = expression();
         eat(EOL, "Expect new line after condition.");
 
+        Stmt head = null;
+        Stmt tail = null;
         while (!match(END)) {
-            statements.add(statement());
+            if (head == null) {
+                head = statement();
+                tail = head;
+            } else {
+                tail.setNext(statement());
+                tail = tail.next();
+            }
         }
 
         if (!atEnd()) {
             eat(EOL, "Expect new line after END");
         }
 
-        return new Stmt.While(condition, statements);
+        return new Stmt.While(condition, head);
     }
 
     private Stmt forStatement() {
@@ -227,16 +256,24 @@ public class Parser {
         }
         eat(RPAREN, "Expect ')' after for statement");
         eat(EOL, "Expect new line after For statement.");
-        List<Stmt> statements = new ArrayList<>();
+
+        Stmt head = null;
+        Stmt tail = null;
         while (!match(END)) {
-            statements.add(statement());
+            if (head == null) {
+                head = statement();
+                tail = head;
+            } else {
+                tail.setNext(statement());
+                tail = tail.next();
+            }
         }
 
         if (!atEnd()) {
             eat(EOL, "Expect new line after End");
         }
 
-        return new Stmt.For(name, start, end, step, statements);
+        return new Stmt.For(name, start, end, step, head);
     }
 
     private Stmt gotoStatement() {
