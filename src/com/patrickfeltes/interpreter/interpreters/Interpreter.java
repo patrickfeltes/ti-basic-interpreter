@@ -211,6 +211,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitLabelStmt(Stmt.Label stmt) {
+        return null;
+    }
+
+    @Override
+    public Void visitGotoStmt(Stmt.Goto stmt) {
+        return null;
+    }
+
     private void handleUserInput(String prompt, Token name) {
         String input;
         do {

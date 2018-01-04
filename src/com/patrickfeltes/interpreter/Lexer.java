@@ -38,6 +38,8 @@ public class Lexer {
         keywords.put("Prompt", PROMPT);
         keywords.put("Input", INPUT);
         keywords.put("End", END);
+        keywords.put("Lbl", LBL);
+        keywords.put("Goto", GOTO);
     }
 
     public Lexer(String program) {

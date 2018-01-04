@@ -17,6 +17,8 @@ public abstract class Stmt {
         R visitIfStmt(If stmt);
         R visitWhileStmt(While stmt);
         R visitForStmt(For stmt);
+        R visitLabelStmt(Label stmt);
+        R visitGotoStmt(Goto stmt);
     }
 
     public static class Expression extends Stmt {
@@ -151,6 +153,32 @@ public abstract class Stmt {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitForStmt(this);
+        }
+    }
+
+    public static class Label extends Stmt {
+        public final String label;
+
+        public Label(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitLabelStmt(this);
+        }
+    }
+
+    public static class Goto extends Stmt {
+        public final String label;
+
+        public Goto(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitGotoStmt(this);
         }
     }
 

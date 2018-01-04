@@ -49,7 +49,9 @@ public class Parser {
                                     | assignStatement
                                     | ifStatement
                                     | whileStatement
-                                    | forStatement;
+                                    | forStatement
+                                    | gotoStatement
+                                    | labelStatement ;
 
             exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
@@ -58,6 +60,12 @@ public class Parser {
             ifStatement             : "If" expression EOL (("Then" EOL statement* ("Else" EOL statement*)? "End") | statement) (EOL | EOF) ;
             whileStatement          : "While" expression EOL statement* "END" (EOL | EOF)
             forStatement            : "For" "(" IDENTIFIER "," expression "," expression ("," expression)? ")" statement* "End" (EOL | EOF) ;
+            labelStmt               : "Lbl" labelIdentifier (EOL | EOF) ;
+            gotoStmt                : "Goto" labelIdentifier (EOL | EOF) ;
+
+            labelIdentifier         : (IDENTIFIER IDENTIFIER?)
+                                    | (NUMBER IDENTIFIER?)
+                                    | (IDENTIFIER NUMBER?) ;
 
             // Expressions
             expression              : logic_or ;
@@ -88,6 +96,8 @@ public class Parser {
         if (match(IF)) return ifStatement();
         if (match(WHILE)) return whileStatement();
         if (match(FOR)) return forStatement();
+        if (match(GOTO)) return gotoStatement();
+        if (match(LBL)) return labelStatement();
 
         return exprOrAssignStatement();
     }
@@ -227,6 +237,53 @@ public class Parser {
         }
 
         return new Stmt.For(name, start, end, step, statements);
+    }
+
+    private Stmt gotoStatement() {
+        String label = labelIdentifier();
+
+        if (!atEnd()) {
+            eat(EOL, "Expect a new line after a Goto statement.");
+        }
+
+        return new Stmt.Goto(label);
+    }
+
+    private Stmt labelStatement() {
+        String label = labelIdentifier();
+
+        if (!atEnd()) {
+            eat(EOL, "Expect a new line after a Lbl statement.");
+        }
+
+        return new Stmt.Label(label);
+    }
+
+    private String labelIdentifier() {
+        StringBuilder builder = new StringBuilder();
+        if (match(IDENTIFIER)) {
+            builder.append(previous().lexeme);
+            if (match(IDENTIFIER)) {
+                builder.append(previous().lexeme);
+            } else if (match(NUMBER)) {
+                builder.append(previous().lexeme);
+            }
+        } else if (match(NUMBER)) {
+            builder.append(previous().lexeme);
+            if (match(NUMBER)) {
+                builder.append(previous().lexeme);
+            } else if (match(IDENTIFIER)) {
+                builder.append(previous().lexeme);
+            }
+        }
+
+        String label = builder.toString();
+        // label identifiers must be at most two characters
+        if (label.length() == 0 || label.length() > 2) {
+            throw error(previous(), "Invalid label");
+        }
+
+        return label;
     }
 
     public Expr expression() {
