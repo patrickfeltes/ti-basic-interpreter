@@ -52,7 +52,9 @@ public class Parser {
                                     | forStatement
                                     | gotoStatement
                                     | labelStatement
-                                    | repeatStatement ;
+                                    | repeatStatement
+                                    | returnStatement
+                                    | stopStatement ;
 
             exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
@@ -64,6 +66,8 @@ public class Parser {
             labelStatement          : "Lbl" labelIdentifier (EOL | EOF) ;
             gotoStatement           : "Goto" labelIdentifier (EOL | EOF) ;
             repeatStatement         : "Repeat" expression EOL statement* "End" (EOL | EOF) ;
+            returnStatement         : "Return" (EOL | EOF) ;
+            stopStatement           : "Stop" (EOL | EOF) ;
 
             labelIdentifier         : (IDENTIFIER IDENTIFIER?)
                                     | (NUMBER IDENTIFIER?)
@@ -108,6 +112,8 @@ public class Parser {
         if (match(GOTO)) return gotoStatement();
         if (match(LBL)) return labelStatement();
         if (match(REPEAT)) return repeatStatement();
+        if (match(RETURN)) return returnStatement();
+        if (match(STOP)) return stopStatement();
 
         return exprOrAssignStatement();
     }
@@ -319,6 +325,16 @@ public class Parser {
         }
 
         return new Stmt.Repeat(condition, head);
+    }
+
+    private Stmt returnStatement() {
+        eat(EOL, "Expect new line after Return.");
+        return new Stmt.Return();
+    }
+
+    private Stmt stopStatement() {
+        eat(EOL, "Expect new line after Stop.");
+        return new Stmt.Stop();
     }
 
     private String labelIdentifier() {

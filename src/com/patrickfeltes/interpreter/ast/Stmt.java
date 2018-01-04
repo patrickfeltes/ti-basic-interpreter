@@ -30,6 +30,8 @@ public abstract class Stmt {
         R visitLabelStmt(Label stmt);
         R visitGotoStmt(Goto stmt);
         R visitRepeatStmt(Repeat stmt);
+        R visitReturnStmt(Return stmt);
+        R visitStopStmt(Stop stmt);
     }
 
     public static class Expression extends Stmt {
@@ -208,4 +210,17 @@ public abstract class Stmt {
         }
     }
 
+    public static class Return extends Stmt {
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitReturnStmt(this);
+        }
+    }
+
+    public static class Stop extends Stmt {
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitStopStmt(this);
+        }
+    }
 }

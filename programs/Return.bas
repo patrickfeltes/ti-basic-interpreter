@@ -1,0 +1,3 @@
+Disp "THIS IS DISPLAYED"
+Return
+Disp "THIS IS NOT"

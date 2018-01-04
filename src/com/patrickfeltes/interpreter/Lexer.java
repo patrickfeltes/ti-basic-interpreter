@@ -41,6 +41,8 @@ public class Lexer {
         keywords.put("Lbl", LBL);
         keywords.put("Goto", GOTO);
         keywords.put("Repeat", REPEAT);
+        keywords.put("Return", RETURN);
+        keywords.put("Stop", STOP);
     }
 
     public Lexer(String program) {

@@ -8,6 +8,8 @@ import com.patrickfeltes.interpreter.ast.Stmt;
 import com.patrickfeltes.interpreter.ast.Parser;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
 import com.patrickfeltes.interpreter.exceptions.GotoException;
+import com.patrickfeltes.interpreter.exceptions.ReturnException;
+import com.patrickfeltes.interpreter.exceptions.StopException;
 import com.patrickfeltes.interpreter.tokens.Token;
 
 import java.util.Map;
@@ -38,6 +40,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 Stmt target = labels.get(ex.label);
                 if (target == null) throw ex;
                 statement = target;
+            } catch (ReturnException ex) {
+                // TODO: should leave subprogram ONLY. once subprogram implemented
+                statement = null;
+            } catch (StopException ex) {
+                statement = null;
             }
         }
     }
@@ -238,6 +245,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         } while ((double)evaluate(stmt.condition) == FALSE);
 
         return null;
+    }
+
+    @Override
+    public Void visitReturnStmt(Stmt.Return stmt) {
+        throw new ReturnException();
+    }
+
+    @Override
+    public Void visitStopStmt(Stmt.Stop stmt) {
+        throw new StopException();
     }
 
     private void handleUserInput(String prompt, Token name) {
