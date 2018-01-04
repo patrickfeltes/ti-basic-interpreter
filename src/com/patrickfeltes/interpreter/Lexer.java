@@ -40,6 +40,7 @@ public class Lexer {
         keywords.put("End", END);
         keywords.put("Lbl", LBL);
         keywords.put("Goto", GOTO);
+        keywords.put("Repeat", REPEAT);
     }
 
     public Lexer(String program) {

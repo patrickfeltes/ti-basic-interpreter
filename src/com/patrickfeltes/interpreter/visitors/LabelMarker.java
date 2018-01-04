@@ -106,6 +106,12 @@ public class LabelMarker implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitRepeatStmt(Stmt.Repeat stmt) {
+        markAll(stmt.head);
+        return null;
+    }
+
     private void markSingle(Stmt stmt) {
         stmt.accept(this);
     }

@@ -230,6 +230,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         throw new GotoException(stmt.label);
     }
 
+    @Override
+    public Void visitRepeatStmt(Stmt.Repeat stmt) {
+        do {
+            executeAllStatements(stmt.head);
+            // execute code until condition is true
+        } while ((double)evaluate(stmt.condition) == FALSE);
+
+        return null;
+    }
+
     private void handleUserInput(String prompt, Token name) {
         String input;
         do {

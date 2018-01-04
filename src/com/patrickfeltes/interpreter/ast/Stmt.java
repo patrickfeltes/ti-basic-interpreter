@@ -29,6 +29,7 @@ public abstract class Stmt {
         R visitForStmt(For stmt);
         R visitLabelStmt(Label stmt);
         R visitGotoStmt(Goto stmt);
+        R visitRepeatStmt(Repeat stmt);
     }
 
     public static class Expression extends Stmt {
@@ -189,6 +190,21 @@ public abstract class Stmt {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitGotoStmt(this);
+        }
+    }
+
+    public static class Repeat extends Stmt {
+        public final Expr condition;
+        public final Stmt head;
+
+        public Repeat(Expr condition, Stmt head) {
+            this.condition = condition;
+            this.head = head;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitRepeatStmt(this);
         }
     }
 

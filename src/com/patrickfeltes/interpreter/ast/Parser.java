@@ -51,7 +51,8 @@ public class Parser {
                                     | whileStatement
                                     | forStatement
                                     | gotoStatement
-                                    | labelStatement ;
+                                    | labelStatement
+                                    | repeatStatement ;
 
             exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
@@ -60,8 +61,9 @@ public class Parser {
             ifStatement             : "If" expression EOL (("Then" EOL statement* ("Else" EOL statement*)? "End") | statement) (EOL | EOF) ;
             whileStatement          : "While" expression EOL statement* "END" (EOL | EOF)
             forStatement            : "For" "(" IDENTIFIER "," expression "," expression ("," expression)? ")" statement* "End" (EOL | EOF) ;
-            labelStmt               : "Lbl" labelIdentifier (EOL | EOF) ;
-            gotoStmt                : "Goto" labelIdentifier (EOL | EOF) ;
+            labelStatement          : "Lbl" labelIdentifier (EOL | EOF) ;
+            gotoStatement           : "Goto" labelIdentifier (EOL | EOF) ;
+            repeatStatement         : "Repeat" expression EOL statement* "End" (EOL | EOF) ;
 
             labelIdentifier         : (IDENTIFIER IDENTIFIER?)
                                     | (NUMBER IDENTIFIER?)
@@ -105,6 +107,7 @@ public class Parser {
         if (match(FOR)) return forStatement();
         if (match(GOTO)) return gotoStatement();
         if (match(LBL)) return labelStatement();
+        if (match(REPEAT)) return repeatStatement();
 
         return exprOrAssignStatement();
     }
@@ -293,6 +296,29 @@ public class Parser {
         }
 
         return new Stmt.Label(label);
+    }
+
+    private Stmt repeatStatement() {
+        Expr condition = expression();
+        eat(EOL, "Expect new line after condition.");
+
+        Stmt head = null;
+        Stmt tail = null;
+        while (!match(END)) {
+            if (head == null) {
+                head = statement();
+                tail = head;
+            } else {
+                tail.setNext(statement());
+                tail = tail.next();
+            }
+        }
+
+        if (!atEnd()) {
+            eat(EOL, "Expect new line after End.");
+        }
+
+        return new Stmt.Repeat(condition, head);
     }
 
     private String labelIdentifier() {
