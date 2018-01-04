@@ -4,11 +4,13 @@ import com.patrickfeltes.interpreter.ast.Parser;
 import com.patrickfeltes.interpreter.ast.Stmt;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
 import com.patrickfeltes.interpreter.files.FileUtilities;
-import com.patrickfeltes.interpreter.interpreters.Interpreter;
+import com.patrickfeltes.interpreter.visitors.Interpreter;
 import com.patrickfeltes.interpreter.tokens.Token;
 import com.patrickfeltes.interpreter.tokens.TokenType;
+import com.patrickfeltes.interpreter.visitors.LabelMarker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -35,6 +37,8 @@ public class Main {
     public static void execute(String program) {
         List<Token> tokens = new Lexer(program).lexTokens();
         List<Stmt> statements = new Parser(tokens).parse();
+        Map<String, Stmt> labels = new LabelMarker().getLabels(statements);
+        System.out.println(labels);
         interpreter.interpret(statements);
     }
 

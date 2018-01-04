@@ -1,4 +1,4 @@
-package com.patrickfeltes.interpreter.interpreters;
+package com.patrickfeltes.interpreter.visitors;
 
 import com.patrickfeltes.interpreter.Environment;
 import com.patrickfeltes.interpreter.Lexer;
