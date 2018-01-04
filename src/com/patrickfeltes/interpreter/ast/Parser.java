@@ -66,7 +66,6 @@ public class Parser {
             labelIdentifier         : (IDENTIFIER IDENTIFIER?)
                                     | (NUMBER IDENTIFIER?)
                                     | (IDENTIFIER NUMBER?) ;
-            statementList           : statement* ;
 
             // Expressions
             expression              : logic_or ;

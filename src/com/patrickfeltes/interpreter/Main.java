@@ -38,8 +38,7 @@ public class Main {
         List<Token> tokens = new Lexer(program).lexTokens();
         Stmt head = new Parser(tokens).parse();
         Map<String, Stmt> labels = new LabelMarker().getLabels(head);
-        System.out.println(labels);
-        interpreter.interpret(head);
+        interpreter.interpret(labels, head);
     }
 
     public static void error(int lineNumber, String message) {

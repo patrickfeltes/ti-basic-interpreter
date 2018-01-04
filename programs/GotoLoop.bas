@@ -1,0 +1,4 @@
+"CLASSIC CALCULATOR PRANK"
+Lbl 1
+Disp "LOSER"
+Goto 1

@@ -7,8 +7,10 @@ import com.patrickfeltes.interpreter.ast.Expr;
 import com.patrickfeltes.interpreter.ast.Stmt;
 import com.patrickfeltes.interpreter.ast.Parser;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
+import com.patrickfeltes.interpreter.exceptions.GotoException;
 import com.patrickfeltes.interpreter.tokens.Token;
 
+import java.util.Map;
 import java.util.Scanner;
 
 import static com.patrickfeltes.interpreter.tokens.TokenType.AND;
@@ -18,12 +20,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private Scanner userInput = new Scanner(System.in);
 
-    private static final double TRUE = 1.0;
-    private static final double FALSE = 0.0;
+    private final double TRUE = 1.0;
+    private final double FALSE = 0.0;
 
     private Environment environment = new Environment();
 
-    public void interpret(Stmt head) {
+    public void interpret(Map<String, Stmt> labels, Stmt head) {
         Stmt statement = head;
         while (statement != null) {
             try {
@@ -31,6 +33,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 statement = statement.next();
             } catch (RuntimeError error) {
                 Main.runtimeError(error);
+                statement = null;
+            } catch (GotoException ex) {
+                Stmt target = labels.get(ex.label);
+                if (target == null) throw ex;
+                statement = target;
             }
         }
     }
@@ -214,12 +221,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitLabelStmt(Stmt.Label stmt) {
+        // no behavior needed; marking is handled in pre-interpreter pass
         return null;
     }
 
     @Override
     public Void visitGotoStmt(Stmt.Goto stmt) {
-        return null;
+        throw new GotoException(stmt.label);
     }
 
     private void handleUserInput(String prompt, Token name) {
