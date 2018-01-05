@@ -1,8 +1,5 @@
 package com.patrickfeltes.interpreter.data_types;
 
-import com.patrickfeltes.interpreter.errors.RuntimeError;
-import com.patrickfeltes.interpreter.tokens.Token;
-
 import java.util.List;
 
 public class TiList {

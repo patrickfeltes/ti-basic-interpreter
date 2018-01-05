@@ -41,6 +41,16 @@ public class Lexer {
         keywords.put("Return", RETURN);
         keywords.put("Stop", STOP);
         keywords.put("Menu", MENU);
+        keywords.put("Str0", STRING_IDENTIFIER);
+        keywords.put("Str1", STRING_IDENTIFIER);
+        keywords.put("Str2", STRING_IDENTIFIER);
+        keywords.put("Str3", STRING_IDENTIFIER);
+        keywords.put("Str4", STRING_IDENTIFIER);
+        keywords.put("Str5", STRING_IDENTIFIER);
+        keywords.put("Str6", STRING_IDENTIFIER);
+        keywords.put("Str7", STRING_IDENTIFIER);
+        keywords.put("Str8", STRING_IDENTIFIER);
+        keywords.put("Str9", STRING_IDENTIFIER);
     }
 
     public Lexer(String program) {

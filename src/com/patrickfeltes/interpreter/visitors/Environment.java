@@ -1,6 +1,5 @@
 package com.patrickfeltes.interpreter.visitors;
 
-import com.patrickfeltes.interpreter.ast.Stmt;
 import com.patrickfeltes.interpreter.data_types.TiList;
 import com.patrickfeltes.interpreter.data_types.TiMatrix;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
@@ -14,35 +13,29 @@ public class Environment {
     private final Set<String> numberVariables = new HashSet<>();
     private final Set<String> listVariables = new HashSet<>();
     private final Set<String> matrixVariables = new HashSet<>();
+    private final Set<String> stringNames = new HashSet<>();
 
     public Environment() {
         defineVariables();
     }
 
     public void defineVariables() {
+        // letter variables
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         for (int i = 0; i < alphabet.length(); i++) {
             numberVariables.add("" + alphabet.charAt(i));
             values.put("" + alphabet.charAt(i), 0.0);
         }
 
+        // matrices
         String matrixNames = "ABCDEFGHIJ";
-        List<List<Double>> matrix = new ArrayList<>();
-        List<Double> row = new ArrayList<>();
-        row.add(0.0);
-        row.add(1.0);
-        matrix.add(row);
-        row = new ArrayList<>();
-        row.add(2.0);
-        row.add(3.0);
-        matrix.add(row);
-        TiMatrix tiMatrix = new TiMatrix(matrix);
         for (int i = 0; i < matrixNames.length(); i++) {
             String name = "[" + matrixNames.charAt(i) + "]";
             matrixVariables.add(name);
-            values.put(name, tiMatrix);
+            values.put(name, null);
         }
 
+        // lists
         listVariables.add("L₁");
         listVariables.add("L₂");
         listVariables.add("L₃");
@@ -51,6 +44,13 @@ public class Environment {
         listVariables.add("L₆");
         for (String string : listVariables) {
             values.put(string, null);
+        }
+
+        // strings
+        for (int i = 0; i < 10; i++) {
+            String name = "Str" + i;
+            stringNames.add(name);
+            values.put(name, null);
         }
     }
 
@@ -97,6 +97,10 @@ public class Environment {
 
         if (matrixVariables.contains(name.lexeme)) {
             if (!(value instanceof TiMatrix)) throw new RuntimeError(name, "Cannot assign a non-matrix to a matrix variable.");
+        }
+
+        if (stringNames.contains(name.lexeme)) {
+            if (!(value instanceof String)) throw new RuntimeError(name, "Cannot assign a non-string to a string variable.");
         }
 
         values.put(name.lexeme, value);

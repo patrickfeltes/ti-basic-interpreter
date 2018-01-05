@@ -3,8 +3,6 @@ package com.patrickfeltes.interpreter.ast;
 import com.patrickfeltes.interpreter.tokens.Token;
 import com.patrickfeltes.interpreter.util.Pair;
 
-import java.util.List;
-
 /**
  * Expr is a node of the syntax tree that evaluates to something.
  */

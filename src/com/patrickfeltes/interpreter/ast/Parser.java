@@ -58,7 +58,7 @@ public class Parser {
                                     | stopStatement
                                     | menuStatement ;
 
-            exprOrAssignStatement   : expression (STO (IDENTIFIER | (MATRIX_IDENTIFIER ("(" expression "," expression ")")? | (LIST_IDENTIFIER ("(" expression ")")?))? (EOL | EOF) ;
+            exprOrAssignStatement   : expression (STO (IDENTIFIER | STRING_IDENTIFIER | (MATRIX_IDENTIFIER ("(" expression "," expression ")")? | (LIST_IDENTIFIER ("(" expression ")")?))? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
             promptStatement         : "Prompt" IDENTIFIER ("," IDENTIFIER)* (EOL | EOF) ;
             inputStatement          : "Input" (STRING ",")? IDENTIFIER? (EOL | EOF);
@@ -91,6 +91,7 @@ public class Parser {
                                     | IDENTIFIER
                                     | (LIST_IDENTIFIER ("(" expression ")")?
                                     | (MATRIX_IDENTIFIER ("(" expression "," expression ")")?)
+                                    | STRING_IDENTIFIER
                                     | ("(" expression ")")
                                     | list
                                     | matrix ;
@@ -188,7 +189,7 @@ public class Parser {
             Token name;
             Expr listIndex = null;
             Pair<Expr, Expr> matrixIndex = null;
-            if (match(IDENTIFIER, LIST_IDENTIFIER, MATRIX_IDENTIFIER)) {
+            if (match(IDENTIFIER, LIST_IDENTIFIER, MATRIX_IDENTIFIER, STRING_IDENTIFIER)) {
                 name = previous();
                 if (previous().type == LIST_IDENTIFIER) {
                     if (match(LPAREN)) {
@@ -552,7 +553,11 @@ public class Parser {
             return new Expr.Grouping(expr);
         }
 
-        if (match(IDENTIFIER, LIST_IDENTIFIER)) {
+        if (match(IDENTIFIER, STRING_IDENTIFIER)) {
+            return new Expr.Variable(previous(), null, null);
+        }
+
+        if (match(LIST_IDENTIFIER)) {
             Expr listIndex = null;
             Token name = previous();
             if (match(LPAREN)) {
