@@ -72,6 +72,11 @@ public class Lexer {
         char c = advance();
 
         switch (c) {
+            case 'L':
+                if (match('₁','₂','₃','₄','₅','₆')) {
+                    addToken(LIST_IDENTIFIER);
+                    break;
+                }
             case '(': addToken(LPAREN); break;
             case ')': addToken(RPAREN); break;
             case '[': addToken(LBRACKET); break;
@@ -211,6 +216,18 @@ public class Lexer {
 
         currentPosition++;
         return true;
+    }
+
+    private boolean match(char... expected) {
+        if (atEnd()) return false;
+        for (char c : expected) {
+            if (source.charAt(currentPosition) == c) {
+                currentPosition++;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

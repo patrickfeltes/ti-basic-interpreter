@@ -64,10 +64,12 @@ public abstract class Stmt {
     public static class Assign extends Stmt {
         public final Expr expression;
         public final Token name;
+        public final Expr index;
 
-        public Assign(Expr expression, Token name) {
+        public Assign(Expr expression, Token name, Expr index) {
             this.expression = expression;
             this.name = name;
+            this.index = index;
         }
 
         @Override

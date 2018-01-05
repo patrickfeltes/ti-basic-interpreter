@@ -57,7 +57,7 @@ public class Parser {
                                     | stopStatement
                                     | menuStatement ;
 
-            exprOrAssignStatement   : expression (STO IDENTIFIER)? (EOL | EOF) ;
+            exprOrAssignStatement   : expression (STO (IDENTIFIER | (LIST_IDENTIFIER ("(" expression ")")?))? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
             promptStatement         : "Prompt" IDENTIFIER ("," IDENTIFIER)* (EOL | EOF) ;
             inputStatement          : "Input" (STRING ",")? IDENTIFIER? (EOL | EOF);
@@ -88,6 +88,7 @@ public class Parser {
             primary                 : NUMBER
                                     | STRING
                                     | IDENTIFIER
+                                    | (LIST_IDENTIFIER ("(" expression ")")?
                                     | ("(" expression ")")
                                     | list ;
 
@@ -180,9 +181,24 @@ public class Parser {
         Expr expr = expression();
 
         if (match(STORE)) {
-            Token name = eat(IDENTIFIER, "Expect an identifier after store.");
-            eat(EOL, "Expect a new line after assign statement");
-            return new Stmt.Assign(expr, name);
+            Token name;
+            Expr index = null;
+            if (match(IDENTIFIER, LIST_IDENTIFIER)) {
+                name = previous();
+                if (previous().type == LIST_IDENTIFIER) {
+                    if (match(LPAREN)) {
+                        index = expression();
+                        eat(RPAREN, "Expect ')' after index expression.");
+                    }
+                }
+            } else {
+                throw error(peek(), "Expect identifier.");
+            }
+
+            if (!atEnd()) {
+                eat(EOL, "Expect a new line after assign statement");
+            }
+            return new Stmt.Assign(expr, name, index);
         }
 
         // no need for an end of line if it is the end of the file
@@ -519,8 +535,14 @@ public class Parser {
             return new Expr.Grouping(expr);
         }
 
-        if (match(IDENTIFIER)) {
-            return new Expr.Variable(previous());
+        if (match(IDENTIFIER, LIST_IDENTIFIER)) {
+            Expr index = null;
+            Token name = previous();
+            if (match(LPAREN)) {
+                index = expression();
+                eat(RPAREN, "Expect ')' after index expression.");
+            }
+            return new Expr.Variable(name, index);
         }
 
         throw error(peek(), "Expect expression.");

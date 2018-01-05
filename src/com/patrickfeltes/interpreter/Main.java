@@ -36,6 +36,7 @@ public class Main {
 
     public static void execute(String program) {
         List<Token> tokens = new Lexer(program).lexTokens();
+        System.out.println(tokens);
         Stmt head = new Parser(tokens).parse();
         Map<String, Stmt> labels = new LabelMarker().getLabels(head);
         interpreter.interpret(labels, head);

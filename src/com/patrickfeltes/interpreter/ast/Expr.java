@@ -112,9 +112,11 @@ public abstract class Expr {
      */
     public static class Variable extends Expr {
         public final Token name;
+        public final Expr index;
 
-        public Variable(Token name) {
+        public Variable(Token name, Expr index) {
             this.name = name;
+            this.index = index;
         }
 
         @Override

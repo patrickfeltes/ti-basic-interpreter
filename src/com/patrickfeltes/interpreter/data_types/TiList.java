@@ -1,6 +1,8 @@
 package com.patrickfeltes.interpreter.data_types;
 
-import java.util.Collections;
+import com.patrickfeltes.interpreter.errors.RuntimeError;
+import com.patrickfeltes.interpreter.tokens.Token;
+
 import java.util.List;
 
 public class TiList {
@@ -16,12 +18,20 @@ public class TiList {
     }
 
     // ti lists are one-indexed
-    public double get(int index) {
-        return this.list.get(index - 1);
+    public double get(double index) {
+        return this.list.get((int)index - 1);
     }
 
-    public void set(List<Double> list) {
-        this.list = list;
+    public void setIndex(double index, double value) {
+        this.list.set((int)index - 1, value);
+    }
+
+    public void add(double value) {
+        this.list.add(value);
+    }
+
+    public int size() {
+        return this.list.size();
     }
 
     public String toString() {

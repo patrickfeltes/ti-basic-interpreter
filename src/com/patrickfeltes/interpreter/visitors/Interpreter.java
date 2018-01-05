@@ -1,6 +1,5 @@
 package com.patrickfeltes.interpreter.visitors;
 
-import com.patrickfeltes.interpreter.Environment;
 import com.patrickfeltes.interpreter.Lexer;
 import com.patrickfeltes.interpreter.Main;
 import com.patrickfeltes.interpreter.ast.Expr;
@@ -120,7 +119,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
-        return environment.get(expr.name);
+        if (expr.index == null) {
+            return environment.get(expr.name);
+        } else {
+            // a list index is specified
+            return environment.getListIndex(expr.name, evaluate(expr.index));
+        }
     }
 
     @Override
@@ -161,7 +165,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitAssignStmt(Stmt.Assign stmt) {
         Object value = evaluate(stmt.expression);
-        environment.assign(stmt.name, value);
+        // an index was specified
+        if (stmt.index != null) {
+            environment.assignListIndex(stmt.name, value, evaluate(stmt.index));
+        } else {
+            environment.assign(stmt.name, value);
+        }
         return null;
     }
 
