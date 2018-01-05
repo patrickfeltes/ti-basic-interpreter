@@ -28,6 +28,8 @@ public class TiMatrix {
 
     public TiMatrix(double[][] matrix) {
         this.matrix = matrix;
+        this.rows = matrix.length;
+        this.cols = matrix[0].length;
     }
 
     public TiMatrix(TiMatrix matrix) {
@@ -101,6 +103,36 @@ public class TiMatrix {
             }
         }
 
+        return new TiMatrix(newMatrix);
+    }
+
+    public static TiMatrix mul(TiMatrix matrix1, TiMatrix matrix2, Token operator) {
+        if (matrix1.cols != matrix2.rows) {
+            throw new RuntimeError(operator, "The dimensions of these matrices are not the same.");
+        }
+
+        double[][] newMatrix = new double[matrix1.rows][matrix2.cols];
+
+        for (int i = 0; i < matrix1.rows; i++) {
+            for (int j = 0; j < matrix2.cols; j++) {
+                double sum = 0;
+                for (int k = 0; k < matrix1.cols; k++) {
+                    sum += matrix1.matrix[i][k] * matrix2.matrix[k][j];
+                }
+                newMatrix[i][j] = sum;
+            }
+        }
+
+        return new TiMatrix(newMatrix);
+    }
+
+    public static TiMatrix scale(TiMatrix matrix, double factor) {
+        double[][] newMatrix = new double[matrix.rows][matrix.cols];
+        for (int r = 0; r < matrix.rows; r++) {
+            for (int c = 0; c < matrix.cols; c++) {
+                newMatrix[r][c] = factor * matrix.matrix[r][c];
+            }
+        }
         return new TiMatrix(newMatrix);
     }
 

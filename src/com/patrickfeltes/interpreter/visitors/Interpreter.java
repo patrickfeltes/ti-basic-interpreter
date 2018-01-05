@@ -56,15 +56,72 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         switch (expr.operator.type) {
             case PLUS:
-                return (double)left + (double)right;
+                if (areNumbers(left, right)) {
+                    return (double)left + (double)right;
+                } else if (areStrings(left, right)) {
+                    return left.toString() + right.toString();
+                } else if (areMatrices(left, right)) {
+                    return TiMatrix.add((TiMatrix)left, (TiMatrix)right, expr.operator);
+                } else if (areLists(left, right)) {
+                    return TiList.add((TiList)left, (TiList)right, expr.operator);
+                } else if (areLists(left) && areNumbers(right)) {
+                    return TiList.addScalar((TiList)left, (double)right);
+                } else if (areLists(right) && areNumbers(left)) {
+                    return TiList.addScalar((TiList)right, (double)left);
+                }
+                throw new RuntimeError(expr.operator, "'+' is not defined for these types.");
             case MINUS:
-                return (double)left - (double)right;
+                if (areNumbers(left, right)) {
+                    return (double)left - (double)right;
+                } else if (areMatrices(left, right)) {
+                    return TiMatrix.sub((TiMatrix)left, (TiMatrix)right, expr.operator);
+                } else if (areLists(left, right)) {
+                    return TiList.sub((TiList)left, (TiList)right, expr.operator);
+                } else if (areLists(left) && areNumbers(right)) {
+                    return TiList.subScalar((TiList)left, (double)right);
+                } else if (areLists(right) && areNumbers(left)) {
+                    return TiList.subList((TiList)right, (double)left);
+                }
+                throw new RuntimeError(expr.operator, "'-' is not defined for these types.");
             case MUL:
-                return (double)left * (double)right;
+                if (areNumbers(left, right)) {
+                    return (double)left * (double)right;
+                } else if (areMatrices(left, right)) {
+                    return TiMatrix.mul((TiMatrix)left, (TiMatrix)right, expr.operator);
+                } else if (areLists(left, right)) {
+                    return TiList.mul((TiList)left, (TiList)right, expr.operator);
+                } else if (areMatrices(left) && areNumbers(right)) {
+                    return TiMatrix.scale((TiMatrix)left, (double)right);
+                } else if (areNumbers(left) && areMatrices(right)) {
+                    return TiMatrix.scale((TiMatrix)right, (double)left);
+                } else if (areLists(left) && areNumbers(right)) {
+                    return TiList.scale((TiList)left, (double)right);
+                } else if (areLists(right) && areNumbers(left)) {
+                    return TiList.scale((TiList)right, (double)left);
+                }
+                throw new RuntimeError(expr.operator, "'*' is not defined for these types.");
             case DIV:
-                return (double)left / (double)right;
+                if (areNumbers(left, right)) {
+                    return (double)left / (double)right;
+                } else if (areLists(left, right)) {
+                    return TiList.div((TiList)left, (TiList)right, expr.operator);
+                } else if (areLists(left) && areNumbers(right)) {
+                    return TiList.divScalar((TiList)left, (double)right);
+                } else if (areLists(right) && areNumbers(left)) {
+                    return TiList.divList((TiList)right, (double)left);
+                }
+                throw new RuntimeError(expr.operator, "'/' is not defined for these types.");
             case POW:
-                return Math.pow((double)left, (double)right);
+                if (areNumbers(left, right)) {
+                    return Math.pow((double)left, (double)right);
+                } else if (areLists(left, right)) {
+                    return TiList.pow((TiList)left, (TiList)right, expr.operator);
+                } else if (areLists(left) && areNumbers(right)) {
+                    return TiList.powScalar((TiList)left, (double)right);
+                } else if (areLists(right) && areNumbers(left)) {
+                    return TiList.powList((TiList)right, (double)left);
+                }
+                throw new RuntimeError(expr.operator, "'^' is not defined for these types.");
             case GT:
                 return ((double)left > (double)right) ? TRUE : FALSE;
             case GTOE:
@@ -348,4 +405,42 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private void executeSingleStatement(Stmt stmt) {
         stmt.accept(this);
     }
+
+    // helper methods for type-checking at runtime
+    private boolean areNumbers(Object... objects) {
+        for (Object object : objects) {
+            if (!(object instanceof Double)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean areStrings(Object... objects) {
+        for (Object object : objects) {
+            if (!(object instanceof String)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean areLists(Object... objects) {
+        for (Object object : objects) {
+            if (!(object instanceof TiList)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean areMatrices(Object... objects) {
+        for (Object object : objects) {
+            if (!(object instanceof TiMatrix)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

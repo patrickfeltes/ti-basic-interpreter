@@ -88,4 +88,130 @@ public class TiList {
         return new TiList(newList);
     }
 
+    public static TiList mul(TiList list1, TiList list2, Token operator) {
+        if (list1.list.size() != list2.list.size()) {
+            throw new RuntimeError(operator, "The dimensions of these lists are not the same.");
+        }
+
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list1.list.size(); i++) {
+            newList.add(list1.list.get(i) * list2.list.get(i));
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList div(TiList list1, TiList list2, Token operator) {
+        if (list1.list.size() != list2.list.size()) {
+            throw new RuntimeError(operator, "The dimensions of these lists are not the same.");
+        }
+
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list1.list.size(); i++) {
+            newList.add(list1.list.get(i) / list2.list.get(i));
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList pow(TiList list1, TiList list2, Token operator) {
+        if (list1.list.size() != list2.list.size()) {
+            throw new RuntimeError(operator, "The dimensions of these lists are not the same.");
+        }
+
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list1.list.size(); i++) {
+            newList.add(Math.pow(list1.list.get(i), list2.list.get(i)));
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList scale(TiList list, double factor) {
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list.list.size(); i++) {
+            newList.add(factor * list.list.get(i));
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList addScalar(TiList list, double number) {
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list.list.size(); i++) {
+            newList.add(number + list.list.get(i));
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList subScalar(TiList list, double number) {
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list.list.size(); i++) {
+            newList.add(list.list.get(i) - number);
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList subList(TiList list, double number) {
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list.list.size(); i++) {
+            newList.add(number - list.list.get(i));
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList divScalar(TiList list, double number) {
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list.list.size(); i++) {
+            newList.add(list.list.get(i) / number);
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList divList(TiList list, double number) {
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list.list.size(); i++) {
+            newList.add(number / list.list.get(i));
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList powScalar(TiList list, double number) {
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list.list.size(); i++) {
+            newList.add(Math.pow(list.list.get(i), number));
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList powList(TiList list, double number) {
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list.list.size(); i++) {
+            newList.add(Math.pow(number, list.list.get(i)));
+        }
+
+        return new TiList(newList);
+    }
+
+
+
+
+
 }
