@@ -79,7 +79,18 @@ public class Lexer {
                 }
             case '(': addToken(LPAREN); break;
             case ')': addToken(RPAREN); break;
-            case '[': addToken(LBRACKET); break;
+            case '[':
+                if (match('A','B','C','D','E','F','G','H','I','J')) {
+                    if (match(']')) {
+                        addToken(MATRIX_IDENTIFIER);
+                    } else {
+                        currentPosition--;
+                        addToken(LBRACKET);
+                    }
+                } else {
+                    addToken(LBRACKET);
+                }
+                break;
             case ']': addToken(RBRACKET); break;
             case '{': addToken(LBRACE); break;
             case '}': addToken(RBRACE); break;

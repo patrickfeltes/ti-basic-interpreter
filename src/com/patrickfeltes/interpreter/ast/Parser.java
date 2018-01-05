@@ -57,7 +57,7 @@ public class Parser {
                                     | stopStatement
                                     | menuStatement ;
 
-            exprOrAssignStatement   : expression (STO (IDENTIFIER | (LIST_IDENTIFIER ("(" expression ")")?))? (EOL | EOF) ;
+            exprOrAssignStatement   : expression (STO (IDENTIFIER | MATRIX_IDENTIFIER | (LIST_IDENTIFIER ("(" expression ")")?))? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
             promptStatement         : "Prompt" IDENTIFIER ("," IDENTIFIER)* (EOL | EOF) ;
             inputStatement          : "Input" (STRING ",")? IDENTIFIER? (EOL | EOF);
@@ -89,6 +89,7 @@ public class Parser {
                                     | STRING
                                     | IDENTIFIER
                                     | (LIST_IDENTIFIER ("(" expression ")")?
+                                    | (MATRIX_IDENTIFIER)
                                     | ("(" expression ")")
                                     | list
                                     | matrix ;
@@ -185,7 +186,7 @@ public class Parser {
         if (match(STORE)) {
             Token name;
             Expr index = null;
-            if (match(IDENTIFIER, LIST_IDENTIFIER)) {
+            if (match(IDENTIFIER, LIST_IDENTIFIER, MATRIX_IDENTIFIER)) {
                 name = previous();
                 if (previous().type == LIST_IDENTIFIER) {
                     if (match(LPAREN)) {
@@ -541,7 +542,7 @@ public class Parser {
             return new Expr.Grouping(expr);
         }
 
-        if (match(IDENTIFIER, LIST_IDENTIFIER)) {
+        if (match(IDENTIFIER, LIST_IDENTIFIER, MATRIX_IDENTIFIER)) {
             Expr index = null;
             Token name = previous();
             if (match(LPAREN)) {
