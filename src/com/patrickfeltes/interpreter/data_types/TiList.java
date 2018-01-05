@@ -1,5 +1,9 @@
 package com.patrickfeltes.interpreter.data_types;
 
+import com.patrickfeltes.interpreter.errors.RuntimeError;
+import com.patrickfeltes.interpreter.tokens.Token;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class TiList {
@@ -11,7 +15,19 @@ public class TiList {
     }
 
     public TiList(List<Double> list) {
-        this.list = list;
+        this.list = new ArrayList<>();
+        // to avoid reference issues if storing one list into another
+        for (Double item : list) {
+            this.list.add(item.doubleValue());
+        }
+    }
+
+    public TiList(TiList list) {
+        this.list = new ArrayList<>();
+        // to avoid reference issues if storing one list into another
+        for (Double item : list.list) {
+            this.list.add(item.doubleValue());
+        }
     }
 
     // ti lists are one-indexed
@@ -42,6 +58,34 @@ public class TiList {
         builder.deleteCharAt(builder.length() - 1);
         builder.append("}");
         return builder.toString();
+    }
+
+    public static TiList add(TiList list1, TiList list2, Token operator) {
+        if (list1.list.size() != list2.list.size()) {
+            throw new RuntimeError(operator, "The dimensions of these lists are not the same.");
+        }
+
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list1.list.size(); i++) {
+            newList.add(list1.list.get(i) + list2.list.get(i));
+        }
+
+        return new TiList(newList);
+    }
+
+    public static TiList sub(TiList list1, TiList list2, Token operator) {
+        if (list1.list.size() != list2.list.size()) {
+            throw new RuntimeError(operator, "The dimensions of these lists are not the same.");
+        }
+
+        List<Double> newList = new ArrayList<>();
+
+        for (int i = 0; i < list1.list.size(); i++) {
+            newList.add(list1.list.get(i) - list2.list.get(i));
+        }
+
+        return new TiList(newList);
     }
 
 }

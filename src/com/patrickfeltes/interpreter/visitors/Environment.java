@@ -89,21 +89,31 @@ public class Environment {
     public void assign(Token name, Object value) {
         if (numberVariables.contains(name.lexeme)) {
             if (!(value instanceof Double)) throw new RuntimeError(name, "Cannot assign a non-number to a number variable.");
+            values.put(name.lexeme, value);
+            return;
         }
 
         if (listVariables.contains(name.lexeme)) {
             if (!(value instanceof TiList)) throw new RuntimeError(name, "Cannot assign a non-list to a list variable.");
+            // need to copy to avoid same reference across lists
+            values.put(name.lexeme, new TiList((TiList)value));
+            return;
         }
 
         if (matrixVariables.contains(name.lexeme)) {
             if (!(value instanceof TiMatrix)) throw new RuntimeError(name, "Cannot assign a non-matrix to a matrix variable.");
+            // need to copy to avoid same reference across matrices
+            values.put(name.lexeme, new TiMatrix((TiMatrix)value));
+            return;
         }
 
         if (stringNames.contains(name.lexeme)) {
             if (!(value instanceof String)) throw new RuntimeError(name, "Cannot assign a non-string to a string variable.");
+            values.put(name.lexeme, value.toString());
+            return;
         }
 
-        values.put(name.lexeme, value);
+        throw new RuntimeError(name, "Invalid type.");
     }
 
     public void assignListIndex(Token name, Object value, Object index) {
