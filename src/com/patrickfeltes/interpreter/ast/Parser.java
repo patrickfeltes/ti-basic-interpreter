@@ -90,9 +90,11 @@ public class Parser {
                                     | IDENTIFIER
                                     | (LIST_IDENTIFIER ("(" expression ")")?
                                     | ("(" expression ")")
-                                    | list ;
-
-            list                    : "{" expression ("," expression)* "}"
+                                    | list
+                                    | matrix ;
+            list                    : "{" expression ("," expression)* "}" ;
+            matrix                  : "[" matrix_list* "]" ;
+            matrix_list             : "[" expression ("," expression)* "]" ;
      */
 
     public Stmt parse() {
@@ -529,6 +531,10 @@ public class Parser {
             return list();
         }
 
+        if (match(LBRACKET)) {
+            return matrix();
+        }
+
         if (match(LPAREN)) {
             Expr expr = expression();
             eat(RPAREN, "Expect ')' after expression.");
@@ -556,6 +562,26 @@ public class Parser {
         }
         eat(RBRACE, "Expect right brace after list.");
         return new Expr.Literal(elements, Expr.Literal.LiteralType.LIST);
+    }
+
+    private Expr matrix() {
+        List<List<Expr>> matrix = new ArrayList<>();
+        while (match(LBRACKET)) {
+            matrix.add(matrixList());
+        }
+        eat(RBRACKET, "Expect closing right bracket after matrix literal.");
+        if (matrix.size() == 0) throw error(previous(), "Can't initialize empty matrix.");
+        return new Expr.Literal(matrix, Expr.Literal.LiteralType.MATRIX);
+    }
+
+    private List<Expr> matrixList() {
+        List<Expr> expressions = new ArrayList<>();
+        expressions.add(expression());
+        while (match(COMMA)) {
+            expressions.add(expression());
+        }
+        eat(RBRACKET, "Expect closing right bracket for each row.");
+        return expressions;
     }
 
     // helper methods

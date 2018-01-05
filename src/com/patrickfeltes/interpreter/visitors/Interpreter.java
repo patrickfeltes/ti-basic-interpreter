@@ -6,16 +6,14 @@ import com.patrickfeltes.interpreter.ast.Expr;
 import com.patrickfeltes.interpreter.ast.Stmt;
 import com.patrickfeltes.interpreter.ast.Parser;
 import com.patrickfeltes.interpreter.data_types.TiList;
+import com.patrickfeltes.interpreter.data_types.TiMatrix;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
 import com.patrickfeltes.interpreter.exceptions.GotoException;
 import com.patrickfeltes.interpreter.exceptions.ReturnException;
 import com.patrickfeltes.interpreter.exceptions.StopException;
 import com.patrickfeltes.interpreter.tokens.Token;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import static com.patrickfeltes.interpreter.tokens.TokenType.AND;
 import static com.patrickfeltes.interpreter.tokens.TokenType.OR;
@@ -91,6 +89,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
+        // TODO: throw error if expressions don't eval to doubles
         if (expr.type == Expr.Literal.LiteralType.LIST) {
             List<Double> list = new ArrayList<>();
             for (Expr expression : (List<Expr>)expr.value) {
@@ -98,6 +97,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             }
 
             return new TiList(list);
+        } else if (expr.type == Expr.Literal.LiteralType.MATRIX) {
+            // TODO: throw error if rows have different lengths
+            List<List<Double>> list = new ArrayList<>();
+            for (List<Expr> row : (List<List<Expr>>)expr.value) {
+                List<Double> temp = new ArrayList<>();
+                for (Expr expression : row) {
+                    temp.add((double)evaluate(expression));
+                }
+                list.add(temp);
+            }
+            return new TiMatrix(list);
         }
 
         return expr.value;
