@@ -1,6 +1,7 @@
 package com.patrickfeltes.interpreter.ast;
 
 import com.patrickfeltes.interpreter.tokens.Token;
+import com.patrickfeltes.interpreter.util.Pair;
 
 import java.util.List;
 
@@ -64,12 +65,14 @@ public abstract class Stmt {
     public static class Assign extends Stmt {
         public final Expr expression;
         public final Token name;
-        public final Expr index;
+        public final Expr listIndex;
+        public final Pair<Expr, Expr> matrixIndex;
 
-        public Assign(Expr expression, Token name, Expr index) {
+        public Assign(Expr expression, Token name, Expr listIndex, Pair<Expr, Expr> matrixIndex) {
             this.expression = expression;
             this.name = name;
-            this.index = index;
+            this.listIndex = listIndex;
+            this.matrixIndex = matrixIndex;
         }
 
         @Override

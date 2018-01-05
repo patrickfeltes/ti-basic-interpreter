@@ -1,5 +1,6 @@
 package com.patrickfeltes.interpreter.visitors;
 
+import com.patrickfeltes.interpreter.ast.Stmt;
 import com.patrickfeltes.interpreter.data_types.TiList;
 import com.patrickfeltes.interpreter.data_types.TiMatrix;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
@@ -70,6 +71,21 @@ public class Environment {
         return list.get(indexNumber);
     }
 
+    public Object getMatrixIndex(Token name, Object row, Object col) {
+        if (!(row instanceof Double)) throw new RuntimeError(name, "Col must be a number.");
+        if (!(col instanceof Double)) throw new RuntimeError(name, "Row must be a number.");
+
+        double rowNumber = (double)row;
+        double colNumber = (double)col;
+        TiMatrix matrix = ((TiMatrix)values.get(name.lexeme));
+
+        if (rowNumber <= 0 || colNumber <= 0 || rowNumber > matrix.getRows() || colNumber > matrix.getCols()) {
+            throw new RuntimeError(name, "Row and/or column is out of range for this matrix.");
+        }
+
+        return matrix.get(rowNumber, colNumber);
+    }
+
     public void assign(Token name, Object value) {
         if (numberVariables.contains(name.lexeme)) {
             if (!(value instanceof Double)) throw new RuntimeError(name, "Cannot assign a non-number to a number variable.");
@@ -101,6 +117,22 @@ public class Environment {
         } else {
             list.setIndex(indexNumber, (double)value);
         }
+    }
+
+    public void assignMatrixIndex(Token name, Object value, Object row, Object col) {
+        if (!(value instanceof Double)) throw new RuntimeError(name, "Cannot assign a non-number to a matrix element.");
+        if (!(row instanceof Double)) throw new RuntimeError(name, "Row must be a number.");
+        if (!(col instanceof Double)) throw new RuntimeError(name, "Col must be a number.");
+
+        double rowNumber = (double)row;
+        double colNumber = (double)col;
+        TiMatrix matrix = ((TiMatrix) values.get(name.lexeme));
+
+        if (rowNumber <= 0 || colNumber <= 0 || rowNumber > matrix.getRows() || colNumber > matrix.getCols()) {
+            throw new RuntimeError(name, "Row and/or column is out of range for this matrix.");
+        }
+
+        matrix.setIndex(rowNumber, colNumber, (double)value);
     }
 
 }

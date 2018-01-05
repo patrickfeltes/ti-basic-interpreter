@@ -1,6 +1,7 @@
 package com.patrickfeltes.interpreter.ast;
 
 import com.patrickfeltes.interpreter.tokens.Token;
+import com.patrickfeltes.interpreter.util.Pair;
 
 import java.util.List;
 
@@ -112,11 +113,13 @@ public abstract class Expr {
      */
     public static class Variable extends Expr {
         public final Token name;
-        public final Expr index;
+        public final Expr listIndex;
+        public final Pair<Expr, Expr> matrixIndex;
 
-        public Variable(Token name, Expr index) {
+        public Variable(Token name, Expr listIndex, Pair<Expr, Expr> matrixIndex) {
             this.name = name;
-            this.index = index;
+            this.listIndex = listIndex;
+            this.matrixIndex = matrixIndex;
         }
 
         @Override

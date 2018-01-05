@@ -23,6 +23,10 @@ public class TiMatrix {
         }
     }
 
+    public double get(double r, double c) {
+        return matrix[(int)r - 1][(int)c - 1];
+    }
+
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
@@ -37,5 +41,15 @@ public class TiMatrix {
         return builder.toString();
     }
 
+    public int getRows() {
+        return rows;
+    }
 
+    public int getCols() {
+        return cols;
+    }
+
+    public void setIndex(double row, double col, double value) {
+        this.matrix[(int)row - 1][(int)col - 1] = value;
+    }
 }

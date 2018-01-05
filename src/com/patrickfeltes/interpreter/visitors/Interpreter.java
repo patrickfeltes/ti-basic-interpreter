@@ -129,11 +129,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
-        if (expr.index == null) {
-            return environment.get(expr.name);
-        } else {
+        if (expr.listIndex != null) {
             // a list index is specified
-            return environment.getListIndex(expr.name, evaluate(expr.index));
+            return environment.getListIndex(expr.name, evaluate(expr.listIndex));
+        } else if(expr.matrixIndex != null) {
+            // a matrix index is specified
+            return environment.getMatrixIndex(expr.name, evaluate(expr.matrixIndex.first), evaluate(expr.matrixIndex.second));
+        } else {
+            return environment.get(expr.name);
         }
     }
 
@@ -176,8 +179,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitAssignStmt(Stmt.Assign stmt) {
         Object value = evaluate(stmt.expression);
         // an index was specified
-        if (stmt.index != null) {
-            environment.assignListIndex(stmt.name, value, evaluate(stmt.index));
+        if (stmt.listIndex != null) {
+            environment.assignListIndex(stmt.name, value, evaluate(stmt.listIndex));
+        } else if (stmt.matrixIndex != null) {
+            environment.assignMatrixIndex(stmt.name, value, evaluate(stmt.matrixIndex.first), evaluate(stmt.matrixIndex.second));
         } else {
             environment.assign(stmt.name, value);
         }

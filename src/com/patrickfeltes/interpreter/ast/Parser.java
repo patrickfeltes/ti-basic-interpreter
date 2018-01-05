@@ -4,6 +4,7 @@ import com.patrickfeltes.interpreter.Main;
 import com.patrickfeltes.interpreter.errors.ParseError;
 import com.patrickfeltes.interpreter.tokens.Token;
 import com.patrickfeltes.interpreter.tokens.TokenType;
+import com.patrickfeltes.interpreter.util.Pair;
 
 import static com.patrickfeltes.interpreter.tokens.TokenType.*;
 
@@ -57,7 +58,7 @@ public class Parser {
                                     | stopStatement
                                     | menuStatement ;
 
-            exprOrAssignStatement   : expression (STO (IDENTIFIER | MATRIX_IDENTIFIER | (LIST_IDENTIFIER ("(" expression ")")?))? (EOL | EOF) ;
+            exprOrAssignStatement   : expression (STO (IDENTIFIER | (MATRIX_IDENTIFIER ("(" expression "," expression ")")? | (LIST_IDENTIFIER ("(" expression ")")?))? (EOL | EOF) ;
             dispStatement           : "Disp" expression ("," expression) (EOL | EOF) ;
             promptStatement         : "Prompt" IDENTIFIER ("," IDENTIFIER)* (EOL | EOF) ;
             inputStatement          : "Input" (STRING ",")? IDENTIFIER? (EOL | EOF);
@@ -89,7 +90,7 @@ public class Parser {
                                     | STRING
                                     | IDENTIFIER
                                     | (LIST_IDENTIFIER ("(" expression ")")?
-                                    | (MATRIX_IDENTIFIER)
+                                    | (MATRIX_IDENTIFIER ("(" expression "," expression ")")?)
                                     | ("(" expression ")")
                                     | list
                                     | matrix ;
@@ -185,13 +186,22 @@ public class Parser {
 
         if (match(STORE)) {
             Token name;
-            Expr index = null;
+            Expr listIndex = null;
+            Pair<Expr, Expr> matrixIndex = null;
             if (match(IDENTIFIER, LIST_IDENTIFIER, MATRIX_IDENTIFIER)) {
                 name = previous();
                 if (previous().type == LIST_IDENTIFIER) {
                     if (match(LPAREN)) {
-                        index = expression();
+                        listIndex = expression();
                         eat(RPAREN, "Expect ')' after index expression.");
+                    }
+                } else if (previous().type == MATRIX_IDENTIFIER) {
+                    if (match(LPAREN)) {
+                        Expr row = expression();
+                        eat(COMMA, "Expect comma between row and column.");
+                        Expr col = expression();
+                        matrixIndex = new Pair<>(row, col);
+                        eat(RPAREN, "Expect ')' after row and col expressions.");
                     }
                 }
             } else {
@@ -201,7 +211,7 @@ public class Parser {
             if (!atEnd()) {
                 eat(EOL, "Expect a new line after assign statement");
             }
-            return new Stmt.Assign(expr, name, index);
+            return new Stmt.Assign(expr, name, listIndex, matrixIndex);
         }
 
         // no need for an end of line if it is the end of the file
@@ -542,14 +552,27 @@ public class Parser {
             return new Expr.Grouping(expr);
         }
 
-        if (match(IDENTIFIER, LIST_IDENTIFIER, MATRIX_IDENTIFIER)) {
-            Expr index = null;
+        if (match(IDENTIFIER, LIST_IDENTIFIER)) {
+            Expr listIndex = null;
             Token name = previous();
             if (match(LPAREN)) {
-                index = expression();
+                listIndex = expression();
                 eat(RPAREN, "Expect ')' after index expression.");
             }
-            return new Expr.Variable(name, index);
+            return new Expr.Variable(name, listIndex, null);
+        }
+
+        if (match(MATRIX_IDENTIFIER)) {
+            Pair<Expr, Expr> matrixIndex = null;
+            Token name = previous();
+            if (match(LPAREN)) {
+                Expr row = expression();
+                eat(COMMA, "Expect comma between row and column.");
+                Expr col = expression();
+                matrixIndex = new Pair<>(row, col);
+                eat(RPAREN, "Expect ')' after row and col expressions.");
+            }
+            return new Expr.Variable(name, null, matrixIndex);
         }
 
         throw error(peek(), "Expect expression.");
