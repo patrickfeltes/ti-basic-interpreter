@@ -85,7 +85,10 @@ public class Parser {
             addition                : multiplication (("+" | "-") multiplication)* ;
             multiplication          : unary (("*" | "/") unary)* ;
             unary                   : (("+" | "-") unary) | exponent ;
-            exponent                : (primary "^" exponent) | unary ;
+            exponent                : (call "^" exponent) | unary ;
+            call                    : FUNCTION_IDENTIFIER "(" arguments? ")"
+                                    | primary;
+            arguments               : expression ( "," expression )* ;
             primary                 : NUMBER
                                     | STRING
                                     | IDENTIFIER
@@ -518,7 +521,7 @@ public class Parser {
     }
 
     private Expr exponent() {
-        Expr expr = primary();
+        Expr expr = call();
 
         // if there is a power, we need to call exponent again for right-associativity
         while (match(POW)) {
@@ -528,6 +531,30 @@ public class Parser {
         }
 
         return expr;
+    }
+
+    private Expr call() {
+        if (match(FUNCTION_IDENTIFIER)) {
+            Token callee = previous();
+            eat(LPAREN, "Expect '(' after function name.");
+            List<Expr> arguments = null;
+            if (!match(RPAREN)) {
+                arguments = arguments();
+                eat(RPAREN, "Expect ')' after function arguments.");
+            }
+            return new Expr.Call(callee, arguments);
+        } else {
+            return primary();
+        }
+    }
+
+    private List<Expr> arguments() {
+        List<Expr> arguments = new ArrayList<>();
+        arguments.add(expression());
+        while (match(COMMA)) {
+            arguments.add(expression());
+        }
+        return arguments;
     }
 
     private Expr primary() {

@@ -3,6 +3,8 @@ package com.patrickfeltes.interpreter.ast;
 import com.patrickfeltes.interpreter.tokens.Token;
 import com.patrickfeltes.interpreter.util.Pair;
 
+import java.util.List;
+
 /**
  * Expr is a node of the syntax tree that evaluates to something.
  */
@@ -29,6 +31,7 @@ public abstract class Expr {
         R visitUnaryExpr(Unary expr);
         R visitVariableExpr(Variable expr);
         R visitLogicalExpr(Logical expr);
+        R visitCallExpr(Call expr);
     }
 
     /**
@@ -142,6 +145,24 @@ public abstract class Expr {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitLogicalExpr(this);
+        }
+    }
+
+    /**
+     * A class for calls, specifically function calls
+     */
+    public static class Call extends Expr {
+        public final Token callee;
+        public final List<Expr> arguments;
+
+        public Call(Token callee, List<Expr> arguments) {
+            this.callee = callee;
+            this.arguments = arguments;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitCallExpr(this);
         }
     }
 

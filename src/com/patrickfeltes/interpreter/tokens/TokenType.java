@@ -18,6 +18,7 @@ public enum TokenType {
     LIST_IDENTIFIER,
     MATRIX_IDENTIFIER,
     STRING_IDENTIFIER,
+    FUNCTION_IDENTIFIER,
 
     // keywords
     DISP, AND, OR, XOR, WHILE, FOR, IF,
