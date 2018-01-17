@@ -3,6 +3,7 @@ package com.patrickfeltes.interpreter.visitors;
 import com.patrickfeltes.interpreter.data_types.TiList;
 import com.patrickfeltes.interpreter.data_types.TiMatrix;
 import com.patrickfeltes.interpreter.errors.RuntimeError;
+import com.patrickfeltes.interpreter.functions.Function;
 import com.patrickfeltes.interpreter.tokens.Token;
 
 import java.util.*;
@@ -15,11 +16,14 @@ public class Environment {
     private final Set<String> matrixVariables = new HashSet<>();
     private final Set<String> stringNames = new HashSet<>();
 
+    private final Map<String, Function> functions = new HashMap<>();
+
     public Environment() {
         defineVariables();
+        defineFunctions();
     }
 
-    public void defineVariables() {
+    private void defineVariables() {
         // letter variables
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         for (int i = 0; i < alphabet.length(); i++) {
@@ -52,6 +56,26 @@ public class Environment {
             stringNames.add(name);
             values.put(name, null);
         }
+    }
+
+    private void defineFunctions() {
+        functions.put("abs", new Function() {
+            protected boolean hasCorrectArguments(List<Object> arguments) {
+                if (arguments.size() != 1) return false;
+                if (!(arguments.get(0) instanceof Double)) return false;
+
+                return true;
+            }
+
+            @Override
+            protected Object functionImplementation(Interpreter interpreter, List<Object> arguments) {
+                return Math.abs((double)arguments.get(0));
+            }
+        });
+    }
+
+    public Object callFunction(String callee, Interpreter interpreter, List<Object> arguments) {
+        return functions.get(callee).call(interpreter, arguments);
     }
 
     public Object get(Token name) {

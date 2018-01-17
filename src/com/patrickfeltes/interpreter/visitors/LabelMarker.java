@@ -49,6 +49,11 @@ public class LabelMarker implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitCallExpr(Expr.Call expr) {
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         return null;
     }

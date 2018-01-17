@@ -541,6 +541,8 @@ public class Parser {
             if (!match(RPAREN)) {
                 arguments = arguments();
                 eat(RPAREN, "Expect ')' after function arguments.");
+            } else {
+                arguments = new ArrayList<>();
             }
             return new Expr.Call(callee, arguments);
         } else {
